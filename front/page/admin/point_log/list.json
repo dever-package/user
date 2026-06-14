@@ -1,0 +1,184 @@
+{
+  "page": {
+    "name": "积分日志",
+    "icon": "receipt-text",
+    "parent": "user/user_point/list",
+    "type": 2,
+    "sort": 2
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4",
+        "children": {
+          "header-actions": {
+            "type": "row",
+            "className": "ms-auto shrink-0 flex-nowrap items-center gap-2"
+          }
+        }
+      },
+      "page-main": {
+        "type": "main",
+        "className": "flex flex-1 flex-col gap-5 sm:gap-6",
+        "children": {
+          "toolbar-row": {
+            "type": "row",
+            "className": "flex-wrap items-center gap-2.5"
+          },
+          "table-row": {
+            "type": "container",
+            "className": "overflow-hidden rounded-md border bg-background"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "header-actions": [
+      {
+        "type": "show-button",
+        "name": "返回上一页",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "back": true,
+          "fallback": "/user/user_point/list"
+        }
+      }
+    ],
+    "toolbar-row": [
+      {
+        "type": "form-select",
+        "placeholder": "变动类型",
+        "value": "search.change_type",
+        "mode": "search",
+        "option": "option.change_type",
+        "meta": {
+          "controlClassName": "w-[160px]"
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "搜索",
+        "meta": {
+          "variant": "default",
+          "size": "sm",
+          "searchSubmit": true,
+          "searchLayoutId": "toolbar-row",
+          "loadingText": "搜索中..."
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "重置",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "searchLayoutId": "toolbar-row",
+          "to": "/user/point_log/list"
+        }
+      }
+    ],
+    "table-row": [
+      {
+        "type": "show-table",
+        "value": "table.list",
+        "meta": {
+          "pagePath": "data.table.page",
+          "pageSizePath": "data.table.pageSize",
+          "totalPath": "data.table.total",
+          "remote": true,
+          "externalPagination": true,
+          "rowKey": "id",
+          "columns": [
+            {
+              "value": "user_name",
+              "name": "用户名",
+              "type": "show-base"
+            },
+            {
+              "value": "user_mobile",
+              "name": "手机号",
+              "type": "show-base"
+            },
+            {
+              "value": "point_name",
+              "name": "积分名称",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "change_type",
+              "type": "show-tag"
+            },
+            {
+              "value": "amount",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "balance_before",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "balance_after",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "source",
+              "type": "show-tag"
+            },
+            {
+              "value": "remark",
+              "type": "show-base"
+            },
+            {
+              "value": "created_at",
+              "type": "show-date"
+            }
+          ]
+        }
+      },
+      {
+        "type": "show-page"
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "积分日志",
+      "description": "查看用户积分增加和消耗记录。"
+    },
+    "search": {
+      "user_id": "",
+      "user_point_id": "",
+      "point_config_id": "",
+      "change_type": ""
+    },
+    "table": {
+      "page": 1,
+      "pageSize": 10,
+      "total": 0,
+      "filterFields": [
+        "user_point_id",
+        "user_id",
+        "point_config_id",
+        "change_type"
+      ],
+      "order": "id desc"
+    }
+  },
+  "state": {},
+  "action": {}
+}

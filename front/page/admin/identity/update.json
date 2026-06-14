@@ -1,0 +1,108 @@
+{
+  "page": {
+    "name": "身份编辑",
+    "parent": "user/identity/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/identity/create",
+        "name": "身份新增",
+        "query": {
+          "id": "empty"
+        }
+      },
+      {
+        "key": "user/identity/update",
+        "name": "身份编辑",
+        "query": {
+          "id": "required"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-input",
+        "placeholder": "例如：会员身份",
+        "value": "form.name",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "身份名称不能为空。"
+          },
+          {
+            "type": "model",
+            "except": "$form.id",
+            "message": "该身份名称已存在，请更换。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-select",
+        "value": "form.purchase_point_id",
+        "mode": "form",
+        "placeholder": "请选择购买积分",
+        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadPointConfigs",
+        "validate": [
+          {
+            "type": "required",
+            "message": "购买积分不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[260px]"
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": "",
+      "name": "",
+      "purchase_point_id": 1,
+      "sort": 100,
+      "status": 1
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form",
+      "data": {
+        "id": "$form.id",
+        "name": "$form.name",
+        "purchase_point_id": "$form.purchase_point_id"
+      },
+      "before": {
+        "type": "service",
+        "use": "user.UserHook.BeforeSaveIdentity"
+      },
+      "after": {
+        "type": "service",
+        "use": "user.UserHook.AfterSaveIdentity"
+      }
+    }
+  }
+}

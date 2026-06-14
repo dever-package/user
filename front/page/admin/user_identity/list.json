@@ -1,0 +1,232 @@
+{
+  "page": {
+    "name": "用户身份",
+    "icon": "id-card",
+    "parent": "user-user",
+    "sort": 3
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4",
+        "children": {
+          "header-actions": {
+            "type": "row",
+            "className": "ms-auto shrink-0 flex-nowrap items-center gap-2"
+          }
+        }
+      },
+      "page-main": {
+        "type": "main",
+        "className": "flex flex-1 flex-col gap-5 sm:gap-6",
+        "children": {
+          "toolbar-row": {
+            "type": "row",
+            "className": "flex-wrap items-center gap-2.5"
+          },
+          "table-row": {
+            "type": "container",
+            "className": "overflow-hidden rounded-md border bg-background"
+          },
+          "feedback-shell": {
+            "type": "container"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "header-actions": [
+      {
+        "type": "show-button",
+        "name": "新增用户身份",
+        "className": "shrink-0",
+        "meta": {
+          "variant": "default",
+          "size": "sm"
+        },
+        "action": {
+          "click": {
+            "type": "modal",
+            "key": "dialog.createUserIdentity",
+            "value": true
+          }
+        }
+      }
+    ],
+    "toolbar-row": [
+      {
+        "type": "form-input",
+        "placeholder": "筛选姓名或手机号...",
+        "value": "search.keyword",
+        "mode": "search"
+      },
+      {
+        "type": "form-select",
+        "placeholder": "身份",
+        "value": "search.identity_id",
+        "mode": "search",
+        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadIdentities",
+        "meta": {
+          "controlClassName": "w-[180px]"
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "搜索",
+        "meta": {
+          "variant": "default",
+          "size": "sm",
+          "searchSubmit": true,
+          "searchLayoutId": "toolbar-row",
+          "loadingText": "搜索中..."
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "重置",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "searchLayoutId": "toolbar-row",
+          "to": "/user/user_identity/list"
+        }
+      }
+    ],
+    "table-row": [
+      {
+        "type": "show-table",
+        "value": "table.list",
+        "meta": {
+          "pagePath": "data.table.page",
+          "pageSizePath": "data.table.pageSize",
+          "totalPath": "data.table.total",
+          "remote": true,
+          "externalPagination": true,
+          "savePath": "user/user_identity/update",
+          "rowKey": "id",
+          "columns": [
+            {
+              "value": "user_info",
+              "name": "用户信息",
+              "type": "show-base"
+            },
+            {
+              "value": "identity_name",
+              "name": "身份",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "level_name",
+              "name": "等级",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "card_no",
+              "name": "卡号",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "expired_at",
+              "name": "过期时间",
+              "type": "show-date"
+            },
+            {
+              "value": "status",
+              "type": "show-tag"
+            },
+            {
+              "value": "created_at",
+              "type": "show-date"
+            },
+            {
+              "name": "操作",
+              "type": "show-button",
+              "className": "w-[1%] whitespace-nowrap px-3 text-center",
+              "meta": {
+                "buttons": [
+                  {
+                    "icon": "receipt-text",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "查看日志",
+                    "to": "/user/user_identity_log/list",
+                    "searchParam": "user_identity_id",
+                    "searchField": "id",
+                    "withBack": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "show-page"
+      }
+    ],
+    "feedback-shell": [
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.createUserIdentity",
+          "pageRoute": "/user/user_identity/update",
+          "title": "新增用户身份",
+          "description": "给用户分配身份并设置当前等级。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "size": "md",
+          "bodyClassName": "py-2"
+        }
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "用户身份",
+      "description": "查看用户当前会员卡身份和等级，新增用户身份会生成卡号并写入日志。"
+    },
+    "search": {
+      "keyword": "",
+      "user_id": "",
+      "identity_id": ""
+    },
+    "table": {
+      "list": "<<user.NewUserIdentityModel>>",
+      "page": 1,
+      "pageSize": 10,
+      "total": 0,
+      "searchFields": [
+        "user_name",
+        "user_mobile"
+      ],
+      "filterFields": [
+        "user_id",
+        "identity_id"
+      ],
+      "service": "user.PointService.AttachUserIdentityListInfo",
+      "order": "id desc"
+    },
+    "actionTarget": {}
+  },
+  "state": {
+    "dialog": {
+      "createUserIdentity": false
+    }
+  },
+  "action": {}
+}

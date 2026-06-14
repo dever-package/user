@@ -1,0 +1,313 @@
+{
+  "page": {
+    "parent": "user/identity_benefit/list",
+    "type": 2,
+    "sort": 12
+  },
+  "layout": {
+    "type": "container",
+    "className": "rounded-md border bg-background",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4 border-b px-4 py-3",
+        "children": {
+          "header-actions": {
+            "type": "row",
+            "className": "ms-auto shrink-0 flex-nowrap items-center gap-2"
+          }
+        }
+      },
+      "table-row": {
+        "type": "container",
+        "className": "overflow-hidden"
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "header-actions": [
+      {
+        "type": "show-button",
+        "name": "添加周期权益",
+        "meta": {
+          "variant": "outline",
+          "size": "sm"
+        },
+        "action": {
+          "click": [
+            {
+              "type": "state",
+              "key": "periodicBenefitIndex",
+              "value": -1
+            },
+            {
+              "type": "state",
+              "key": "periodicBenefitForm",
+              "value": {
+                "benefit_type": "reward_point",
+                "point_config_id": 1,
+                "point_amount": 1,
+                "cycle_days": 1,
+                "limit_times": 1,
+                "clear_previous": 1,
+                "status": 1,
+                "sort": 100
+              }
+            },
+            {
+              "type": "modal",
+              "key": "dialog.periodicBenefit",
+              "value": true
+            }
+          ]
+        }
+      }
+    ],
+    "table-row": [
+      {
+        "type": "show-table",
+        "value": "parent.data.form.periodic_benefits",
+        "meta": {
+          "rowKey": "id",
+          "columns": [
+            {
+              "name": "权益",
+              "value": "point_config_id",
+              "type": "show-tag",
+              "className": "text-center",
+              "meta": {
+                "option": "option.point_config"
+              }
+            },
+            {
+              "name": "数量",
+              "value": "point_amount",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "name": "天数",
+              "value": "cycle_days",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "name": "上限次数",
+              "value": "limit_times",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "name": "清空上次权益",
+              "value": "clear_previous",
+              "type": "show-tag",
+              "className": "text-center",
+              "meta": {
+                "option": "option.clear_previous"
+              }
+            },
+            {
+              "name": "启用",
+              "value": "status",
+              "type": "form-switch",
+              "action": {
+                "change": {
+                  "type": "array",
+                  "key": "parent.data.form.periodic_benefits",
+                  "op": "patch",
+                  "index": "$rowIndex",
+                  "value": {
+                    "status": "$value"
+                  }
+                }
+              },
+              "meta": {
+                "trueValue": 1,
+                "falseValue": 2
+              }
+            },
+            {
+              "name": "排序",
+              "value": "sort",
+              "type": "show-base",
+              "editor": "form-number",
+              "trigger": "doubleClick",
+              "action": {
+                "change": {
+                  "type": "array",
+                  "key": "parent.data.form.periodic_benefits",
+                  "op": "patch",
+                  "index": "$rowIndex",
+                  "value": {
+                    "sort": "$value"
+                  }
+                }
+              },
+              "meta": {
+                "controlClassName": "w-24"
+              }
+            },
+            {
+              "name": "操作",
+              "type": "show-button",
+              "className": "w-[1%] whitespace-nowrap px-3 text-center",
+              "meta": {
+                "buttons": [
+                  {
+                    "icon": "square-pen",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "编辑周期权益",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "state",
+                          "key": "periodicBenefitIndex",
+                          "value": "$rowIndex"
+                        },
+                        {
+                          "type": "state",
+                          "key": "periodicBenefitForm",
+                          "value": "$row"
+                        },
+                        {
+                          "type": "state",
+                          "key": "periodicBenefitForm.benefit_type",
+                          "value": "reward_point"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "dialog.periodicBenefit",
+                          "value": true
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "icon": "trash-2",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "删除周期权益",
+                    "className": "text-destructive hover:text-destructive",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "state",
+                          "key": "deleteBenefitIndex",
+                          "value": "$rowIndex"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "dialog.deleteBenefit",
+                          "value": true
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.periodicBenefit",
+          "pageRoute": "/user/identity_benefit/periodic",
+          "title": "周期权益",
+          "description": "当前只支持奖励积分。",
+          "size": "lg",
+          "footer": {
+            "confirm": true,
+            "confirmText": "确定"
+          },
+          "pageDataPatches": {
+            "form": "state.periodicBenefitForm"
+          }
+        },
+        "action": {
+          "submit": {
+            "type": "array",
+            "key": "parent.data.form.periodic_benefits",
+            "op": "upsert",
+            "index": "state.periodicBenefitIndex",
+            "value": "$modalForm"
+          }
+        }
+      },
+      {
+        "type": "feedback-confirm",
+        "name": "删除周期权益",
+        "info": "确认删除这一条周期权益吗？删除后当前行内容将被移除。",
+        "meta": {
+          "stateKey": "dialog.deleteBenefit",
+          "successMessage": "周期权益已删除"
+        },
+        "action": {
+          "confirm": {
+            "type": "array",
+            "key": "parent.data.form.periodic_benefits",
+            "op": "remove",
+            "index": "state.deleteBenefitIndex"
+          }
+        }
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "周期权益",
+      "description": "配置定期发放的权益。"
+    },
+    "option": {
+      "point_config": "{{user.UserOptionService.LoadPointConfigs}}",
+      "clear_previous": [
+        {
+          "id": 1,
+          "value": "清空"
+        },
+        {
+          "id": 2,
+          "value": "不清空"
+        }
+      ],
+      "status": [
+        {
+          "id": 1,
+          "value": "开启"
+        },
+        {
+          "id": 2,
+          "value": "停用"
+        }
+      ]
+    }
+  },
+  "state": {
+    "periodicBenefitIndex": -1,
+    "deleteBenefitIndex": -1,
+    "periodicBenefitForm": {
+      "benefit_type": "reward_point",
+      "point_config_id": 1,
+      "point_amount": 1,
+      "cycle_days": 1,
+      "limit_times": 1,
+      "clear_previous": 1,
+      "status": 1,
+      "sort": 100
+    },
+    "dialog": {
+      "periodicBenefit": false,
+      "deleteBenefit": false
+    }
+  },
+  "action": {}
+}

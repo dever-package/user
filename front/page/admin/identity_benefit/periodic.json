@@ -1,0 +1,154 @@
+{
+  "page": {
+    "name": "周期权益编辑",
+    "parent": "user/identity_benefit/list",
+    "type": 2
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-cascader",
+        "name": "权益",
+        "placeholder": "请选择权益",
+        "value": "form.point_config_id",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "权益不能为空。"
+          }
+        ],
+        "meta": {
+          "api": "/front/route/option",
+          "type": "service",
+          "use": "user.UserOptionService.LoadBenefitTypes",
+          "childUse": "user.UserOptionService.LoadBenefitItems",
+          "childParentField": "benefit_type",
+          "childExtraFields": "benefit_type",
+          "valueMode": "leaf",
+          "placeholder": [
+            "选择类型",
+            "选择权益"
+          ],
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[360px]"
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "数量",
+        "placeholder": "请输入每周期奖励数量",
+        "value": "form.point_amount",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "数量不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "数量必须大于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "天数",
+        "placeholder": "请输入发放间隔天数",
+        "value": "form.cycle_days",
+        "mode": "form",
+        "info": "每隔多少天发放一次奖励，这里填写天数。",
+        "validate": [
+          {
+            "type": "required",
+            "message": "天数不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "天数必须大于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "上限次数",
+        "placeholder": "请输入上限次数",
+        "value": "form.limit_times",
+        "mode": "form",
+        "info": "同一个周期权益最多发放多少次，默认 1 次。",
+        "validate": [
+          {
+            "type": "required",
+            "message": "上限次数不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "上限次数必须大于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-switch",
+        "name": "清空上次权益",
+        "value": "form.clear_previous",
+        "mode": "form",
+        "info": "开启后，新周期发放前会清空上个周期未使用的同类权益；关闭后，上个周期未使用权益会继续保留。",
+        "meta": {
+          "formLayout": "horizontal",
+          "trueValue": 1,
+          "falseValue": 2
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": "",
+      "benefit_type": "reward_point",
+      "point_config_id": 1,
+      "point_amount": 1,
+      "cycle_days": 1,
+      "limit_times": 1,
+      "clear_previous": 1,
+      "status": 1,
+      "sort": 100
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form"
+    }
+  }
+}

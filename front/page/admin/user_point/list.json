@@ -1,0 +1,262 @@
+{
+  "page": {
+    "name": "用户积分",
+    "icon": "coins",
+    "parent": "user-user",
+    "sort": 2
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4",
+        "children": {
+          "header-actions": {
+            "type": "row",
+            "className": "ms-auto shrink-0 flex-nowrap items-center gap-2"
+          }
+        }
+      },
+      "page-main": {
+        "type": "main",
+        "className": "flex flex-1 flex-col gap-5 sm:gap-6",
+        "children": {
+          "toolbar-row": {
+            "type": "row",
+            "className": "flex-wrap items-center gap-2.5"
+          },
+          "table-row": {
+            "type": "container",
+            "className": "overflow-hidden rounded-md border bg-background"
+          },
+          "feedback-shell": {
+            "type": "container"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "header-actions": [
+      {
+        "type": "show-button",
+        "name": "调整积分",
+        "className": "shrink-0",
+        "meta": {
+          "variant": "default",
+          "size": "sm"
+        },
+        "action": {
+          "click": [
+            {
+              "type": "data",
+              "key": "actionTarget.adjustPoint",
+              "value": {}
+            },
+            {
+              "type": "modal",
+              "key": "dialog.adjustPoints",
+              "value": true
+            }
+          ]
+        }
+      }
+    ],
+    "toolbar-row": [
+      {
+        "type": "form-input",
+        "placeholder": "筛选姓名或手机号...",
+        "value": "search.keyword",
+        "mode": "search"
+      },
+      {
+        "type": "form-select",
+        "placeholder": "积分",
+        "value": "search.point_config_id",
+        "mode": "search",
+        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadPointConfigs",
+        "meta": {
+          "controlClassName": "w-[180px]"
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "搜索",
+        "meta": {
+          "variant": "default",
+          "size": "sm",
+          "searchSubmit": true,
+          "searchLayoutId": "toolbar-row",
+          "loadingText": "搜索中..."
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "重置",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "searchLayoutId": "toolbar-row",
+          "to": "/user/user_point/list"
+        }
+      }
+    ],
+    "table-row": [
+      {
+        "type": "show-table",
+        "value": "table.list",
+        "meta": {
+          "pagePath": "data.table.page",
+          "pageSizePath": "data.table.pageSize",
+          "totalPath": "data.table.total",
+          "remote": true,
+          "externalPagination": true,
+          "rowKey": "id",
+          "columns": [
+            {
+              "value": "user_info",
+              "name": "用户信息",
+              "type": "show-base"
+            },
+            {
+              "value": "point_name",
+              "name": "积分名称",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "balance",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "total_added",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "total_used",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "created_at",
+              "type": "show-date"
+            },
+            {
+              "name": "操作",
+              "type": "show-button",
+              "className": "w-[1%] whitespace-nowrap px-3 text-center",
+              "meta": {
+                "buttons": [
+                  {
+                    "icon": "circle-plus",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "调整积分",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "data",
+                          "key": "actionTarget.adjustPoint",
+                          "value": "$row"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "dialog.adjustPoints",
+                          "value": true
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "icon": "receipt-text",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "积分日志",
+                    "to": "/user/point_log/list",
+                    "searchParam": "user_point_id",
+                    "searchField": "id",
+                    "withBack": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "show-page"
+      }
+    ],
+    "feedback-shell": [
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.adjustPoints",
+          "pageRoute": "/user/user_point/points",
+          "title": "调整积分",
+          "description": "积分变动会写入积分日志。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "pageDataPatches": {
+            "form.user_id": "data.actionTarget.adjustPoint.user_id",
+            "form.point_config_id": "data.actionTarget.adjustPoint.point_config_id",
+            "form.balance": "data.actionTarget.adjustPoint.balance",
+            "form.user_name": "data.actionTarget.adjustPoint.user_name",
+            "form.user_mobile": "data.actionTarget.adjustPoint.user_mobile",
+            "form.point_name": "data.actionTarget.adjustPoint.point_name"
+          },
+          "size": "md",
+          "bodyClassName": "py-2"
+        }
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "用户积分",
+      "description": "查看用户各类积分余额，并在这里调整积分或查看积分日志。"
+    },
+    "search": {
+      "keyword": "",
+      "user_id": "",
+      "point_config_id": ""
+    },
+    "table": {
+      "list": "<<user.NewUserPointModel>>",
+      "page": 1,
+      "pageSize": 10,
+      "total": 0,
+      "searchFields": [
+        "user_name",
+        "user_mobile"
+      ],
+      "filterFields": [
+        "user_id",
+        "point_config_id"
+      ],
+      "service": "user.PointService.AttachUserInfo",
+      "order": "id desc"
+    },
+    "actionTarget": {
+      "adjustPoint": {}
+    }
+  },
+  "state": {
+    "dialog": {
+      "adjustPoints": false
+    }
+  },
+  "action": {}
+}

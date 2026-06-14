@@ -1,0 +1,122 @@
+{
+  "page": {
+    "name": "用户编辑",
+    "parent": "user/user/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/user/create",
+        "name": "用户新增",
+        "query": {
+          "id": "empty"
+        }
+      },
+      {
+        "key": "user/user/update",
+        "name": "用户编辑",
+        "query": {
+          "id": "required"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-input",
+        "placeholder": "请输入姓名",
+        "value": "form.name",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "姓名不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-input",
+        "placeholder": "请输入手机号",
+        "value": "form.mobile",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "手机号不能为空。"
+          },
+          {
+            "type": "pattern",
+            "pattern": "^1\\d{10}$",
+            "message": "手机号格式不正确。"
+          },
+          {
+            "type": "model",
+            "except": "$form.id",
+            "message": "该手机号已存在，请更换。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-textarea",
+        "placeholder": "请输入备注",
+        "value": "form.remark",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal",
+          "rows": 3
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": "",
+      "name": "",
+      "mobile": "",
+      "status": 1,
+      "remark": ""
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form",
+      "data": {
+        "id": "$form.id",
+        "name": "$form.name",
+        "mobile": "$form.mobile",
+        "remark": "$form.remark"
+      },
+      "before": {
+        "type": "service",
+        "use": "user.UserHook.BeforeSaveUser"
+      },
+      "after": {
+        "type": "service",
+        "use": "user.UserHook.AfterSaveUser"
+      }
+    }
+  }
+}

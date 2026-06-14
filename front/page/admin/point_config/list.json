@@ -1,0 +1,280 @@
+{
+  "page": {
+    "name": "积分配置",
+    "icon": "circle-dollar-sign",
+    "parent": "user-config",
+    "sort": 1
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4",
+        "children": {
+          "header-actions": {
+            "type": "row",
+            "className": "ms-auto shrink-0 flex-nowrap items-center gap-2"
+          }
+        }
+      },
+      "page-main": {
+        "type": "main",
+        "className": "flex flex-1 flex-col gap-5 sm:gap-6",
+        "children": {
+          "toolbar-row": {
+            "type": "row",
+            "className": "flex-wrap items-center gap-2.5"
+          },
+          "table-row": {
+            "type": "container",
+            "className": "overflow-hidden rounded-md border bg-background"
+          },
+          "feedback-shell": {
+            "type": "container"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "header-actions": [
+      {
+        "type": "show-button",
+        "name": "新增积分配置",
+        "className": "shrink-0",
+        "meta": {
+          "variant": "default",
+          "size": "sm",
+          "icon": "plus"
+        },
+        "action": {
+          "click": {
+            "type": "modal",
+            "key": "dialog.create",
+            "value": true
+          }
+        }
+      }
+    ],
+    "toolbar-row": [
+      {
+        "type": "form-input",
+        "placeholder": "筛选积分名称...",
+        "value": "search.keyword",
+        "mode": "search"
+      },
+      {
+        "type": "show-button",
+        "name": "搜索",
+        "meta": {
+          "variant": "default",
+          "size": "sm",
+          "searchSubmit": true,
+          "searchLayoutId": "toolbar-row",
+          "loadingText": "搜索中..."
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "重置",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "searchLayoutId": "toolbar-row",
+          "to": "/user/point_config/list"
+        }
+      }
+    ],
+    "table-row": [
+      {
+        "type": "show-table",
+        "value": "table.list",
+        "meta": {
+          "pagePath": "data.table.page",
+          "pageSizePath": "data.table.pageSize",
+          "totalPath": "data.table.total",
+          "remote": true,
+          "externalPagination": true,
+          "rowKey": "id",
+          "columns": [
+            {
+              "value": "id",
+              "name": "配置ID",
+              "type": "show-base",
+              "className": "w-[1%] whitespace-nowrap text-center"
+            },
+            {
+              "value": "name",
+              "type": "show-base"
+            },
+            {
+              "value": "exchange_rate",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "symbol",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "symbol_position",
+              "type": "show-tag"
+            },
+            {
+              "value": "created_at",
+              "type": "show-date"
+            },
+            {
+              "name": "操作",
+              "type": "show-button",
+              "className": "w-[1%] whitespace-nowrap px-3 text-center",
+              "meta": {
+                "buttons": [
+                  {
+                    "icon": "square-pen",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "编辑积分配置",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "data",
+                          "key": "actionTarget.editId",
+                          "value": "$row.id"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "dialog.edit",
+                          "value": true
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "icon": "trash-2",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "删除积分配置",
+                    "className": "text-destructive hover:text-destructive",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "data",
+                          "key": "actionTarget.deleteConfig",
+                          "value": "$row"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "confirm.delete",
+                          "value": true
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "show-page"
+      }
+    ],
+    "feedback-shell": [
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.create",
+          "pageRoute": "/user/point_config/update",
+          "title": "新增积分配置",
+          "description": "维护积分和支付货币之间的换算规则。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "size": "lg",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.edit",
+          "pageRoute": "/user/point_config/update",
+          "title": "编辑积分配置",
+          "description": "调整积分名称、介绍、换算和符号展示。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "pageRouteQuery": {
+            "id": "data.actionTarget.editId"
+          },
+          "size": "lg",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-confirm",
+        "name": "删除积分配置",
+        "info": "确认删除当前积分配置吗？",
+        "meta": {
+          "stateKey": "confirm.delete"
+        },
+        "action": {
+          "confirm": {
+            "type": "delete",
+            "path": "user/point_config/update",
+            "params": "actionTarget.deleteConfig",
+            "before": {
+              "type": "service",
+              "use": "user.UserHook.BeforeDeletePointConfig"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "积分配置",
+      "description": "维护积分名称、介绍、货币换算和符号展示。"
+    },
+    "search": {
+      "keyword": ""
+    },
+    "table": {
+      "page": 1,
+      "pageSize": 10,
+      "total": 0,
+      "searchFields": [
+        "name"
+      ],
+      "order": "id desc"
+    },
+    "actionTarget": {
+      "editId": "",
+      "deleteConfig": {}
+    }
+  },
+  "state": {
+    "dialog": {
+      "create": false,
+      "edit": false
+    },
+    "confirm": {
+      "delete": false
+    }
+  },
+  "action": {}
+}

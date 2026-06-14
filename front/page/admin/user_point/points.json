@@ -1,0 +1,172 @@
+{
+  "page": {
+    "name": "积分调整",
+    "parent": "user/user_point/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/user_point/points",
+        "name": "调整积分"
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-select",
+        "name": "用户",
+        "placeholder": "请选择用户",
+        "value": "form.user_id",
+        "mode": "form",
+        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadUsers&pageSize=20",
+        "validate": [
+          {
+            "type": "required",
+            "message": "用户不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-select",
+        "name": "积分",
+        "placeholder": "请选择积分",
+        "value": "form.point_config_id",
+        "mode": "form",
+        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadPointConfigs",
+        "validate": [
+          {
+            "type": "required",
+            "message": "积分不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[220px]"
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "当前余额",
+        "value": "form.balance",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal",
+          "disabled": true,
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-radio",
+        "name": "变动类型",
+        "value": "form.change_type",
+        "mode": "form",
+        "option": "option.change_type",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请选择积分变动类型。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "变动积分",
+        "placeholder": "请输入变动积分",
+        "value": "form.amount",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "变动积分不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "变动积分必须大于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-textarea",
+        "name": "变动原因",
+        "placeholder": "请输入积分变动原因",
+        "value": "form.remark",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请填写积分变动原因。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "rows": 3
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "user_id": "",
+      "user_name": "",
+      "user_mobile": "",
+      "point_config_id": "",
+      "point_name": "",
+      "balance": 0,
+      "change_type": "increase",
+      "amount": 1,
+      "remark": ""
+    },
+    "option": {
+      "change_type": [
+        {
+          "id": "increase",
+          "value": "增加积分",
+          "label": "增加积分"
+        },
+        {
+          "id": "consume",
+          "value": "消耗积分",
+          "label": "消耗积分"
+        }
+      ]
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "use": "user.NewUserPointModel",
+      "params": "form",
+      "before": {
+        "type": "service",
+        "use": "user.PointService.Adjust"
+      }
+    }
+  }
+}

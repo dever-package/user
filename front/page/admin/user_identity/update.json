@@ -1,0 +1,123 @@
+{
+  "page": {
+    "name": "用户身份新增",
+    "parent": "user/user_identity/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/user_identity/create",
+        "name": "用户身份新增",
+        "query": {
+          "id": "empty"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-select",
+        "value": "form.user_id",
+        "mode": "form",
+        "placeholder": "请选择用户",
+        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadUsers&pageSize=20",
+        "validate": [
+          {
+            "type": "required",
+            "message": "用户不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[260px]",
+          "searchPlaceholder": "输入姓名或手机号搜索..."
+        }
+      },
+      {
+        "type": "form-cascader",
+        "name": "身份等级",
+        "value": "form.level_id",
+        "mode": "form",
+        "placeholder": "请选择身份和等级",
+        "meta": {
+          "api": "/front/route/option",
+          "use": "user.NewIdentityModel",
+          "childUse": "user.NewIdentityLevelModel",
+          "childParentField": "identity_id",
+          "valueMode": "leaf",
+          "placeholder": ["选择身份", "选择等级"],
+          "formLayout": "horizontal"
+        },
+        "validate": [
+          {
+            "type": "required",
+            "message": "身份等级不能为空。"
+          }
+        ]
+      },
+      {
+        "type": "form-textarea",
+        "name": "新增原因",
+        "value": "form.remark",
+        "mode": "form",
+        "placeholder": "请输入新增会员身份原因",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请填写新增原因。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "rows": 3
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": "",
+      "user_id": "",
+      "level_id": "",
+      "status": 1,
+      "remark": ""
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form",
+      "data": {
+        "id": "$form.id",
+        "_virtual": "$form._virtual",
+        "user_id": "$form.user_id",
+        "identity_id": "$form.identity_id",
+        "level_id": "$form.level_id",
+        "card_no": "$form.card_no",
+        "expired_at": "$form.expired_at",
+        "status": "$form.status",
+        "remark": "$form.remark"
+      },
+      "before": {
+        "type": "service",
+        "use": "user.UserIdentityService.Create"
+      }
+    }
+  }
+}

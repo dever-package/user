@@ -1,0 +1,479 @@
+{
+  "page": {
+    "name": "身份配置",
+    "icon": "shield-check",
+    "parent": "user-config",
+    "type": 1,
+    "sort": 2
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4"
+      },
+      "page-main": {
+        "type": "main",
+        "className": "flex flex-1 flex-col gap-5 sm:gap-6",
+        "children": {
+          "content-shell": {
+            "type": "container",
+            "className": "front-two-pane-layout",
+            "children": {
+              "identity-column": {
+                "type": "container",
+                "className": "min-w-0"
+              },
+              "level-column": {
+                "type": "container",
+                "className": "flex min-w-0 flex-col gap-4",
+                "children": {
+                  "level-title": {
+                    "type": "container",
+                    "className": "min-w-0"
+                  },
+                  "level-toolbar": {
+                    "type": "row",
+                    "className": "flex-wrap items-center gap-2.5"
+                  },
+                  "level-table": {
+                    "type": "container",
+                    "className": "overflow-hidden rounded-md border bg-background"
+                  }
+                }
+              }
+            }
+          },
+          "feedback-shell": {
+            "type": "container"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "identity-column": [
+      {
+        "type": "show-category-list",
+        "id": "user-identity-list",
+        "value": "search.identity_id",
+        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadIdentities",
+        "meta": {
+          "title": "身份",
+          "description": "左侧维护用户身份，右侧维护当前身份下的等级。",
+          "remote": true,
+          "defaultFirst": true,
+          "queryKey": "identity_id",
+          "sortable": true,
+          "sortField": "sort",
+          "sortChangeAction": {
+            "type": "save",
+            "path": "user/identity/update",
+            "params": {
+              "_partial": true,
+              "id": "$row.id",
+              "sort": "$value"
+            }
+          },
+          "createButton": {
+            "name": "新增身份",
+            "icon": "plus",
+            "variant": "outline",
+            "size": "sm",
+            "action": {
+              "click": {
+                "type": "modal",
+                "key": "dialog.createIdentity",
+                "value": true
+              }
+            }
+          },
+          "statusField": "status",
+          "statusDisplay": "select",
+          "statusChangeAction": {
+            "type": "save",
+            "path": "user/identity/update",
+            "params": {
+              "_partial": true,
+              "id": "$row.id",
+              "status": "$value"
+            }
+          },
+          "statusCases": [
+            {
+              "value": 1,
+              "text": "启用",
+              "tone": "success"
+            },
+            {
+              "value": 2,
+              "text": "停用",
+              "tone": "muted"
+            }
+          ],
+          "buttons": [
+            {
+              "icon": "square-pen",
+              "variant": "ghost",
+              "size": "sm",
+              "description": "编辑身份",
+              "action": {
+                "click": [
+                  {
+                    "type": "data",
+                    "key": "actionTarget.editIdentityId",
+                    "value": "$row.id"
+                  },
+                  {
+                    "type": "modal",
+                    "key": "dialog.editIdentity",
+                    "value": true
+                  }
+                ]
+              }
+            },
+            {
+              "icon": "trash-2",
+              "variant": "ghost",
+              "size": "sm",
+              "description": "删除身份",
+              "action": {
+                "click": [
+                  {
+                    "type": "data",
+                    "key": "actionTarget.deleteIdentity",
+                    "value": "$row"
+                  },
+                  {
+                    "type": "modal",
+                    "key": "confirm.deleteIdentity",
+                    "value": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "level-title": [
+      {
+        "type": "show-title",
+        "value": "page.levelTitle",
+        "meta": {
+          "variant": "section"
+        }
+      }
+    ],
+    "level-toolbar": [
+      {
+        "type": "form-input",
+        "placeholder": "筛选等级名称...",
+        "value": "search.keyword",
+        "mode": "search"
+      },
+      {
+        "type": "show-button",
+        "name": "搜索",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "searchSubmit": true
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "新增等级",
+        "className": "ms-auto shrink-0",
+        "meta": {
+          "variant": "default",
+          "size": "sm",
+          "icon": "plus"
+        },
+        "action": {
+          "click": {
+            "type": "modal",
+            "key": "dialog.createLevel",
+            "value": true
+          }
+        }
+      }
+    ],
+    "level-table": [
+      {
+        "type": "show-table",
+        "value": "table.list",
+        "meta": {
+          "remote": true,
+          "savePath": "user/identity_level/update",
+          "rowKey": "id",
+          "columns": [
+            {
+              "value": "name",
+              "type": "show-base"
+            },
+            {
+              "value": "level",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "duration_days",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "duration_type",
+              "type": "show-tag"
+            },
+            {
+              "value": "upgrade_method",
+              "type": "show-tag"
+            },
+            {
+              "value": "pay_type",
+              "type": "show-tag"
+            },
+            {
+              "value": "pay_amount",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "status",
+              "type": "form-switch",
+              "meta": {
+                "trueValue": 1,
+                "falseValue": 2
+              }
+            },
+            {
+              "value": "sort",
+              "type": "show-base",
+              "editor": "form-number",
+              "trigger": "doubleClick",
+              "tip": "正序排序，数值越小越靠前。"
+            },
+            {
+              "value": "created_at",
+              "type": "show-date"
+            },
+            {
+              "name": "操作",
+              "type": "show-button",
+              "className": "w-[1%] whitespace-nowrap px-3 text-center",
+              "meta": {
+                "buttons": [
+                  {
+                    "icon": "square-pen",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "编辑等级",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "data",
+                          "key": "actionTarget.editLevelId",
+                          "value": "$row.id"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "dialog.editLevel",
+                          "value": true
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "icon": "trash-2",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "删除等级",
+                    "className": "text-destructive hover:text-destructive",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "data",
+                          "key": "actionTarget.deleteLevel",
+                          "value": "$row"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "confirm.deleteLevel",
+                          "value": true
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "feedback-shell": [
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.createIdentity",
+          "pageRoute": "/user/identity/update",
+          "title": "新增身份",
+          "description": "身份用于承载一组用户等级。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "size": "sm",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.editIdentity",
+          "pageRoute": "/user/identity/update",
+          "title": "编辑身份",
+          "description": "调整身份名称。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "pageRouteQuery": {
+            "id": "data.actionTarget.editIdentityId"
+          },
+          "size": "sm",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.createLevel",
+          "pageRoute": "/user/identity_level/update",
+          "title": "新增等级",
+          "description": "等级会挂到当前身份下。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "pageDataPatches": {
+            "form.identity_id": "data.search.identity_id"
+          },
+          "size": "lg",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.editLevel",
+          "pageRoute": "/user/identity_level/update",
+          "title": "编辑等级",
+          "description": "调整等级、时长和升级规则。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "pageRouteQuery": {
+            "id": "data.actionTarget.editLevelId"
+          },
+          "size": "lg",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-confirm",
+        "name": "删除身份",
+        "info": "确认删除当前身份吗？身份下仍有等级时会阻止删除。",
+        "meta": {
+          "stateKey": "confirm.deleteIdentity"
+        },
+        "action": {
+          "confirm": {
+            "type": "delete",
+            "path": "user/identity/update",
+            "params": "actionTarget.deleteIdentity",
+            "before": {
+              "type": "service",
+              "use": "user.UserHook.BeforeDeleteIdentity"
+            }
+          }
+        }
+      },
+      {
+        "type": "feedback-confirm",
+        "name": "删除等级",
+        "info": "确认删除当前等级吗？",
+        "meta": {
+          "stateKey": "confirm.deleteLevel"
+        },
+        "action": {
+          "confirm": {
+            "type": "delete",
+            "path": "user/identity_level/update",
+            "params": "actionTarget.deleteLevel",
+            "before": {
+              "type": "service",
+              "use": "user.UserHook.BeforeDeleteIdentityLevel"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "身份配置",
+      "description": "维护用户身份及身份等级。",
+      "levelTitle": {
+        "title": "等级列表",
+        "description": "维护当前身份下的等级、时长和升级支付规则。"
+      }
+    },
+    "search": {
+      "identity_id": "",
+      "keyword": ""
+    },
+    "table": {
+      "list": "<<user.NewIdentityLevelModel>>",
+      "page": 1,
+      "pageSize": 200,
+      "total": 0,
+      "searchFields": [
+        "name"
+      ],
+      "filterFields": [
+        "identity_id"
+      ],
+      "order": "sort asc,level asc,id asc"
+    },
+    "actionTarget": {
+      "editIdentityId": "",
+      "deleteIdentity": {},
+      "editLevelId": "",
+      "deleteLevel": {}
+    }
+  },
+  "state": {
+    "dialog": {
+      "createIdentity": false,
+      "editIdentity": false,
+      "createLevel": false,
+      "editLevel": false
+    },
+    "confirm": {
+      "deleteIdentity": false,
+      "deleteLevel": false
+    }
+  },
+  "action": {}
+}

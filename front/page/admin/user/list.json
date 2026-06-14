@@ -1,0 +1,306 @@
+{
+  "page": {
+    "name": "用户信息",
+    "icon": "users-round",
+    "parent": "user-user",
+    "sort": 1
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4",
+        "children": {
+          "header-actions": {
+            "type": "row",
+            "className": "ms-auto shrink-0 flex-nowrap items-center gap-2"
+          }
+        }
+      },
+      "page-main": {
+        "type": "main",
+        "className": "flex flex-1 flex-col gap-5 sm:gap-6",
+        "children": {
+          "toolbar-row": {
+            "type": "row",
+            "className": "flex-wrap items-center gap-2.5"
+          },
+          "table-row": {
+            "type": "container",
+            "className": "overflow-hidden rounded-md border bg-background"
+          },
+          "feedback-shell": {
+            "type": "container"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "header-actions": [
+      {
+        "type": "show-button",
+        "name": "新增用户",
+        "className": "shrink-0",
+        "meta": {
+          "variant": "default",
+          "size": "sm"
+        },
+        "action": {
+          "click": {
+            "type": "modal",
+            "key": "dialog.create",
+            "value": true
+          }
+        }
+      }
+    ],
+    "toolbar-row": [
+      {
+        "type": "form-input",
+        "placeholder": "筛选姓名或手机号...",
+        "value": "search.keyword",
+        "mode": "search"
+      },
+      {
+        "type": "form-select",
+        "placeholder": "状态",
+        "value": "search.status",
+        "mode": "search",
+        "option": "option.status",
+        "meta": {
+          "controlClassName": "w-[140px]"
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "搜索",
+        "meta": {
+          "variant": "default",
+          "size": "sm",
+          "searchSubmit": true,
+          "searchLayoutId": "toolbar-row",
+          "loadingText": "搜索中..."
+        }
+      },
+      {
+        "type": "show-button",
+        "name": "重置",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "searchLayoutId": "toolbar-row",
+          "to": "/user/user/list"
+        }
+      }
+    ],
+    "table-row": [
+      {
+        "type": "show-table",
+        "value": "table.list",
+        "meta": {
+          "pagePath": "data.table.page",
+          "pageSizePath": "data.table.pageSize",
+          "totalPath": "data.table.total",
+          "remote": true,
+          "externalPagination": true,
+          "savePath": "user/user/update",
+          "rowKey": "id",
+          "columns": [
+            {
+              "value": "id",
+              "name": "用户ID",
+              "type": "show-base",
+              "className": "w-[1%] whitespace-nowrap text-center"
+            },
+            {
+              "value": "name",
+              "type": "show-base"
+            },
+            {
+              "value": "mobile",
+              "type": "show-base"
+            },
+            {
+              "value": "point_summary",
+              "name": "积分余额",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "identity_summary",
+              "name": "用户身份",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "status",
+              "type": "form-switch",
+              "meta": {
+                "trueValue": 1,
+                "falseValue": 2
+              }
+            },
+            {
+              "value": "created_at",
+              "type": "show-date"
+            },
+            {
+              "name": "操作",
+              "type": "show-button",
+              "className": "w-[1%] whitespace-nowrap px-3 text-center",
+              "meta": {
+                "buttons": [
+                  {
+                    "icon": "square-pen",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "编辑用户",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "data",
+                          "key": "actionTarget.editUserId",
+                          "value": "$row.id"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "dialog.edit",
+                          "value": true
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "icon": "trash-2",
+                    "variant": "outline",
+                    "size": "sm",
+                    "description": "删除用户",
+                    "className": "text-destructive hover:text-destructive",
+                    "action": {
+                      "click": [
+                        {
+                          "type": "data",
+                          "key": "actionTarget.deleteUser",
+                          "value": "$row"
+                        },
+                        {
+                          "type": "modal",
+                          "key": "confirm.delete",
+                          "value": true
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "show-page"
+      }
+    ],
+    "feedback-shell": [
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.create",
+          "pageRoute": "/user/user/update",
+          "title": "新增用户",
+          "description": "维护业务员用户的基础信息。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "size": "md",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-modal",
+        "meta": {
+          "stateKey": "dialog.edit",
+          "pageRoute": "/user/user/update",
+          "title": "编辑用户",
+          "description": "调整业务员用户的姓名、手机号和备注。",
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          },
+          "pageRouteQuery": {
+            "id": "data.actionTarget.editUserId"
+          },
+          "size": "md",
+          "bodyClassName": "py-2"
+        }
+      },
+      {
+        "type": "feedback-confirm",
+        "name": "删除用户",
+        "info": "确认删除当前用户吗？",
+        "meta": {
+          "stateKey": "confirm.delete"
+        },
+        "action": {
+          "confirm": {
+            "type": "delete",
+            "path": "user/user/update",
+            "params": "actionTarget.deleteUser",
+            "before": {
+              "type": "service",
+              "use": "user.UserHook.BeforeDeleteUser"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "用户信息",
+      "description": "维护业务员用户的基础信息，积分余额和用户身份仅作汇总展示。"
+    },
+    "search": {
+      "keyword": "",
+      "status": ""
+    },
+    "table": {
+      "page": 1,
+      "pageSize": 10,
+      "total": 0,
+      "searchFields": [
+        "name",
+        "mobile"
+      ],
+      "filterFields": [
+        "status"
+      ],
+      "service": "user.PointService.AttachUserPointSummary",
+      "order": "id desc"
+    },
+    "actionTarget": {
+      "editUserId": "",
+      "deleteUser": {}
+    }
+  },
+  "state": {
+    "dialog": {
+      "create": false,
+      "edit": false
+    },
+    "confirm": {
+      "delete": false
+    }
+  },
+  "action": {}
+}

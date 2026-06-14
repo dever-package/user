@@ -1,0 +1,143 @@
+{
+  "page": {
+    "name": "积分配置编辑",
+    "parent": "user/point_config/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/point_config/create",
+        "name": "积分配置新增",
+        "query": {
+          "id": "empty"
+        }
+      },
+      {
+        "key": "user/point_config/update",
+        "name": "积分配置编辑",
+        "query": {
+          "id": "required"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-input",
+        "placeholder": "例如：积分",
+        "value": "form.name",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "积分名称不能为空。"
+          },
+          {
+            "type": "model",
+            "except": "$form.id",
+            "message": "该积分名称已存在，请更换。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-textarea",
+        "placeholder": "请输入积分介绍",
+        "value": "form.intro",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal",
+          "rows": 3
+        }
+      },
+      {
+        "type": "form-number",
+        "value": "form.exchange_rate",
+        "mode": "form",
+        "info": "货币换算-换算支付货币的，默认为 100，当前支付货币与积分之间的换算关系，填写 100，则 1 个支付货币可换成 100 个积分；当使用该积分进行支付时，将根据换算关系自动转换成支付货币，用以拉起支付；填写 0，无法与支付货币自动换算，支付和提现都将无法使用。",
+        "validate": [
+          {
+            "type": "required",
+            "message": "货币换算不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 0,
+            "message": "货币换算不能小于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-input",
+        "placeholder": "例如：¥、积分",
+        "value": "form.symbol",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-radio",
+        "value": "form.symbol_position",
+        "mode": "form",
+        "option": "option.symbol_position",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请选择符号位置。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": "",
+      "name": "",
+      "intro": "",
+      "exchange_rate": 100,
+      "symbol": "",
+      "symbol_position": 2
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form",
+      "before": {
+        "type": "service",
+        "use": "user.UserHook.BeforeSavePointConfig"
+      },
+      "after": {
+        "type": "service",
+        "use": "user.UserHook.AfterSavePointConfig"
+      }
+    }
+  }
+}

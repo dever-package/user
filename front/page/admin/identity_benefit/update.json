@@ -1,0 +1,96 @@
+{
+  "page": {
+    "name": "身份权益编辑",
+    "parent": "user/identity_benefit/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/identity_benefit/update",
+        "name": "身份权益编辑"
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full",
+            "children": {
+              "periodic-benefit-page": {
+                "type": "container",
+                "path": "/user/identity_benefit/periodic_list",
+                "className": "mt-5"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "show-base",
+        "name": "身份",
+        "value": "form.identity.name",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "show-base",
+        "name": "等级",
+        "value": "form.name",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "_model": "user.NewIdentityLevelModel",
+      "id": "",
+      "identity_id": "",
+      "name": "",
+      "level": 0,
+      "periodic_benefits": [],
+      "_fields": [
+        "identity_id",
+        "name",
+        "level",
+        "periodic_benefits"
+      ]
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "use": "user.NewIdentityLevelModel",
+      "upsert": true,
+      "params": "form",
+      "data": {
+        "id": "$form.id",
+        "identity_id": "$form.identity_id",
+        "identity_name": "$form.identity.name",
+        "level_id": "$form.id",
+        "level_name": "$form.name",
+        "level": "$form.level",
+        "_virtual": true,
+        "periodic_benefits": "$form.periodic_benefits"
+      },
+      "before": {
+        "type": "service",
+        "use": "user.BenefitService.BeforeSaveIdentityBenefit"
+      }
+    }
+  }
+}

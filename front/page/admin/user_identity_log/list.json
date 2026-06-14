@@ -1,0 +1,146 @@
+{
+  "page": {
+    "name": "用户身份日志",
+    "icon": "receipt-text",
+    "parent": "user/user_identity/list",
+    "type": 2,
+    "sort": 3
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-header": {
+        "type": "header",
+        "className": "gap-4",
+        "children": {
+          "header-actions": {
+            "type": "row",
+            "className": "ms-auto shrink-0 flex-nowrap items-center gap-2"
+          }
+        }
+      },
+      "page-main": {
+        "type": "main",
+        "className": "flex flex-1 flex-col gap-5 sm:gap-6",
+        "children": {
+          "table-row": {
+            "type": "container",
+            "className": "overflow-hidden rounded-md border bg-background"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "page-header": [
+      {
+        "type": "show-title",
+        "value": "page",
+        "className": "min-w-0 flex-1"
+      }
+    ],
+    "header-actions": [
+      {
+        "type": "show-button",
+        "name": "返回上一页",
+        "meta": {
+          "variant": "outline",
+          "size": "sm",
+          "back": true,
+          "fallback": "/user/user_identity/list"
+        }
+      }
+    ],
+    "table-row": [
+      {
+        "type": "show-table",
+        "value": "table.list",
+        "meta": {
+          "pagePath": "data.table.page",
+          "pageSizePath": "data.table.pageSize",
+          "totalPath": "data.table.total",
+          "remote": true,
+          "externalPagination": true,
+          "rowKey": "id",
+          "columns": [
+            {
+              "value": "user_name",
+              "name": "用户名",
+              "type": "show-base"
+            },
+            {
+              "value": "user_mobile",
+              "name": "手机号",
+              "type": "show-base"
+            },
+            {
+              "value": "identity_name",
+              "name": "身份",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "level_name",
+              "name": "等级",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "card_no",
+              "name": "卡号",
+              "type": "show-base",
+              "className": "text-center"
+            },
+            {
+              "value": "started_at",
+              "name": "开始时间",
+              "type": "show-date"
+            },
+            {
+              "value": "expired_at",
+              "name": "过期时间",
+              "type": "show-date"
+            },
+            {
+              "value": "remark",
+              "name": "原因",
+              "type": "show-base"
+            },
+            {
+              "value": "created_at",
+              "type": "show-date"
+            }
+          ]
+        }
+      },
+      {
+        "type": "show-page"
+      }
+    ]
+  },
+  "data": {
+    "page": {
+      "title": "用户身份日志",
+      "description": "查看用户身份新增记录。"
+    },
+    "search": {
+      "user_identity_id": "",
+      "user_id": "",
+      "identity_id": ""
+    },
+    "table": {
+      "list": "<<user.NewUserIdentityLogModel>>",
+      "page": 1,
+      "pageSize": 10,
+      "total": 0,
+      "filterFields": [
+        "user_identity_id",
+        "user_id",
+        "identity_id"
+      ],
+      "order": "id desc"
+    }
+  },
+  "state": {},
+  "action": {}
+}

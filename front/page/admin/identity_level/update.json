@@ -1,0 +1,254 @@
+{
+  "page": {
+    "name": "等级编辑",
+    "parent": "user/identity/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/identity_level/create",
+        "name": "等级新增",
+        "query": {
+          "id": "empty"
+        }
+      },
+      {
+        "key": "user/identity_level/update",
+        "name": "等级编辑",
+        "query": {
+          "id": "required"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-select",
+        "value": "form.identity_id",
+        "mode": "form",
+        "option": "/front/route/option?type=model&use=user.NewIdentityModel&order=sort asc,id asc",
+        "validate": [
+          {
+            "type": "required",
+            "message": "所属身份不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[260px]"
+        }
+      },
+      {
+        "type": "form-input",
+        "placeholder": "例如：月会员",
+        "value": "form.name",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "等级名称不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-number",
+        "value": "form.level",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "等级数字不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "等级数字必须大于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-number",
+        "value": "form.duration_days",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "时长天数不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "时长天数必须大于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      },
+      {
+        "type": "form-radio",
+        "value": "form.duration_type",
+        "mode": "form",
+        "option": "option.duration_type",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请选择升级时长类型。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-radio",
+        "value": "form.upgrade_method",
+        "mode": "form",
+        "option": "option.upgrade_method",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请选择升级方式。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-radio",
+        "value": "form.pay_type",
+        "mode": "form",
+        "option": "option.pay_type",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请选择支付方式。",
+            "when": [
+              {
+                "path": "form.upgrade_method",
+                "operator": "equals",
+                "value": 1
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "showWhen": [
+            {
+              "path": "form.upgrade_method",
+              "operator": "equals",
+              "value": 1
+            }
+          ]
+        }
+      },
+      {
+        "type": "form-number",
+        "value": "form.pay_amount",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "支付金额不能为空。",
+            "when": [
+              {
+                "path": "form.upgrade_method",
+                "operator": "equals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "支付金额必须大于 0。",
+            "when": [
+              {
+                "path": "form.upgrade_method",
+                "operator": "equals",
+                "value": 1
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]",
+          "showWhen": [
+            {
+              "path": "form.upgrade_method",
+              "operator": "equals",
+              "value": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": "",
+      "identity_id": "",
+      "name": "",
+      "level": 1,
+      "duration_days": 30,
+      "duration_type": 1,
+      "upgrade_method": 1,
+      "pay_type": 1,
+      "pay_amount": 0,
+      "status": 1,
+      "sort": 100
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form",
+      "data": {
+        "id": "$form.id",
+        "identity_id": "$form.identity_id",
+        "name": "$form.name",
+        "level": "$form.level",
+        "duration_days": "$form.duration_days",
+        "duration_type": "$form.duration_type",
+        "upgrade_method": "$form.upgrade_method",
+        "pay_type": "$form.pay_type",
+        "pay_amount": "$form.pay_amount"
+      },
+      "before": {
+        "type": "service",
+        "use": "user.UserHook.BeforeSaveIdentityLevel"
+      },
+      "after": {
+        "type": "service",
+        "use": "user.UserHook.AfterSaveIdentityLevel"
+      }
+    }
+  }
+}
