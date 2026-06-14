@@ -66,7 +66,7 @@
     "toolbar-row": [
       {
         "type": "form-input",
-        "placeholder": "筛选姓名或手机号...",
+        "placeholder": "筛选账号、姓名或手机号...",
         "value": "search.keyword",
         "mode": "search"
       },
@@ -123,6 +123,10 @@
             },
             {
               "value": "name",
+              "type": "show-base"
+            },
+            {
+              "value": "account",
               "type": "show-base"
             },
             {

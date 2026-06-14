@@ -226,9 +226,6 @@ func (UserHook) ProviderBeforeSaveUser(_ *server.Context, params []any) any {
 	}
 	if mobileValue, ok := payload["mobile"]; ok {
 		payload["mobile"] = strings.TrimSpace(util.ToString(mobileValue))
-		if payload["mobile"] == "" {
-			panic(frontaction.NewFieldError("form.mobile", "手机号不能为空。"))
-		}
 	}
 	if remarkValue, ok := payload["remark"]; ok {
 		payload["remark"] = strings.TrimSpace(util.ToString(remarkValue))

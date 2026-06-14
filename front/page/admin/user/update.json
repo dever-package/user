@@ -39,6 +39,15 @@
     "dialog-shell": [
       {
         "type": "form-input",
+        "placeholder": "请输入账号",
+        "value": "form.account",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-input",
         "placeholder": "请输入姓名",
         "value": "form.name",
         "mode": "form",
@@ -59,18 +68,9 @@
         "mode": "form",
         "validate": [
           {
-            "type": "required",
-            "message": "手机号不能为空。"
-          },
-          {
             "type": "pattern",
             "pattern": "^1\\d{10}$",
             "message": "手机号格式不正确。"
-          },
-          {
-            "type": "model",
-            "except": "$form.id",
-            "message": "该手机号已存在，请更换。"
           }
         ],
         "meta": {
@@ -92,6 +92,7 @@
   "data": {
     "form": {
       "id": "",
+      "account": "",
       "name": "",
       "mobile": "",
       "status": 1,
@@ -105,6 +106,7 @@
       "params": "form",
       "data": {
         "id": "$form.id",
+        "account": "$form.account",
         "name": "$form.name",
         "mobile": "$form.mobile",
         "remark": "$form.remark"

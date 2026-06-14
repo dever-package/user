@@ -5,6 +5,25 @@ var userStatusOptions = []map[string]any{
 	{"id": 2, "value": "禁用", "label": "禁用", "color": "#737373"},
 }
 
+var credentialProviderOptions = []map[string]any{
+	{"id": "password", "value": "密码登录", "label": "密码登录", "color": "#2563eb"},
+}
+
+var credentialStatusOptions = []map[string]any{
+	{"id": 1, "value": "正常", "label": "正常", "color": "#0f766e"},
+	{"id": 2, "value": "禁用", "label": "禁用", "color": "#737373"},
+}
+
+var tokenStatusOptions = []map[string]any{
+	{"id": 1, "value": "有效", "label": "有效", "color": "#0f766e"},
+	{"id": 2, "value": "撤销", "label": "撤销", "color": "#737373"},
+}
+
+var apiKeyStatusOptions = []map[string]any{
+	{"id": 1, "value": "启用", "label": "启用", "color": "#0f766e"},
+	{"id": 2, "value": "停用", "label": "停用", "color": "#737373"},
+}
+
 var pointChangeTypeOptions = []map[string]any{
 	{"id": "increase", "value": "增加积分", "label": "增加积分", "color": "#0f766e"},
 	{"id": "consume", "value": "消耗积分", "label": "消耗积分", "color": "#dc2626"},
