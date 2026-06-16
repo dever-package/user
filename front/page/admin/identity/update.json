@@ -62,7 +62,10 @@
         "value": "form.purchase_point_id",
         "mode": "form",
         "placeholder": "请选择购买积分",
-        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadPointConfigs",
+        "option": {
+          "type": "service",
+          "service": "user.UserOptionService.LoadPointConfigs"
+        },
         "validate": [
           {
             "type": "required",

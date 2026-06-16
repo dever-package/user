@@ -33,7 +33,11 @@
         "placeholder": "请选择用户",
         "value": "form.user_id",
         "mode": "form",
-        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadUsers&pageSize=20",
+        "option": {
+          "type": "service",
+          "service": "user.UserOptionService.LoadUsers",
+          "pageSize": 20
+        },
         "validate": [
           {
             "type": "required",
@@ -50,7 +54,10 @@
         "placeholder": "请选择积分",
         "value": "form.point_config_id",
         "mode": "form",
-        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadPointConfigs",
+        "option": {
+          "type": "service",
+          "service": "user.UserOptionService.LoadPointConfigs"
+        },
         "validate": [
           {
             "type": "required",

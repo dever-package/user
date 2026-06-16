@@ -75,7 +75,10 @@
         "placeholder": "身份",
         "value": "search.identity_id",
         "mode": "search",
-        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadIdentities",
+        "option": {
+          "type": "service",
+          "service": "user.UserOptionService.LoadIdentities"
+        },
         "meta": {
           "controlClassName": "w-[180px]"
         }

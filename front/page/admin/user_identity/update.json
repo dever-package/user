@@ -35,7 +35,11 @@
         "value": "form.user_id",
         "mode": "form",
         "placeholder": "请选择用户",
-        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadUsers&pageSize=20",
+        "option": {
+          "type": "service",
+          "service": "user.UserOptionService.LoadUsers",
+          "pageSize": 20
+        },
         "validate": [
           {
             "type": "required",

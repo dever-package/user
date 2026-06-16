@@ -41,7 +41,10 @@
         "type": "form-select",
         "value": "form.identity_id",
         "mode": "form",
-        "option": "/front/route/option?type=model&use=user.NewIdentityModel&order=sort asc,id asc",
+        "option": {
+          "model": "user.NewIdentityModel",
+          "order": "sort asc,id asc"
+        },
         "validate": [
           {
             "type": "required",

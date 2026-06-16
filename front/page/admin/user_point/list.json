@@ -82,7 +82,10 @@
         "placeholder": "积分",
         "value": "search.point_config_id",
         "mode": "search",
-        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadPointConfigs",
+        "option": {
+          "type": "service",
+          "service": "user.UserOptionService.LoadPointConfigs"
+        },
         "meta": {
           "controlClassName": "w-[180px]"
         }

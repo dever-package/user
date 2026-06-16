@@ -65,7 +65,10 @@
         "type": "show-category-list",
         "id": "user-identity-list",
         "value": "search.identity_id",
-        "option": "/front/route/option?type=service&use=user.UserOptionService.LoadIdentities",
+        "option": {
+          "type": "service",
+          "service": "user.UserOptionService.LoadIdentities"
+        },
         "meta": {
           "title": "身份",
           "description": "左侧维护用户身份，右侧维护当前身份下的等级。",
