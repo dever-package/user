@@ -226,6 +226,7 @@ func createRefreshToken(ctx context.Context, userID uint64) (string, error) {
 		"status":     usermodel.TokenStatusEnabled,
 		"expires_at": now.Add(refreshTokenTTL),
 		"created_at": now,
+		"used_at":    now,
 	})
 	return token, nil
 }
