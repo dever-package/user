@@ -10,6 +10,9 @@
     "/user/auth/register",
     "/user/auth/refresh"
   ],
+  "skills": [
+    "skills/user/SKILL.md"
+  ],
   "sites": {
     "body": {
       "apiRoots": [
