@@ -14,12 +14,6 @@
     "skills/user/SKILL.md"
   ],
   "sites": {
-    "body": {
-      "apiRoots": [
-        "api_key",
-        "auth"
-      ]
-    },
     "admin": {
       "auth": [
         {
