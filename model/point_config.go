@@ -16,11 +16,6 @@ type PointConfig struct {
 	CreatedAt      time.Time `dorm:"not null;default:CURRENT_TIMESTAMP;comment:创建时间"`
 }
 
-type PointConfigIndex struct {
-	Name      struct{} `unique:"name"`
-	CreatedAt struct{} `index:"created_at"`
-}
-
 var pointConfigSeed = []map[string]any{
 	{
 		"id":              1,
@@ -34,7 +29,6 @@ var pointConfigSeed = []map[string]any{
 
 func NewPointConfigModel() *orm.Model[PointConfig] {
 	return orm.LoadModel[PointConfig]("积分配置", "point_config", orm.ModelConfig{
-		Index:    PointConfigIndex{},
 		Seeds:    pointConfigSeed,
 		Order:    "id desc",
 		Database: "default",

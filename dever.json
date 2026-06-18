@@ -5,57 +5,59 @@
   "depends": {
     "front": ">=0.1.0"
   },
-  "public": [
-    "/user/auth/login",
-    "/user/auth/register",
-    "/user/auth/refresh"
-  ],
   "skills": [
     "skills/user/SKILL.md"
   ],
-  "sites": {
-    "admin": {
-      "auth": [
-        {
-          "key": "user-center",
-          "name": "用户中心",
-          "icon": "users-round",
-          "type": 1,
-          "sort": 2,
-          "children": [
-            {
-              "key": "user-user",
-              "name": "用户",
-              "icon": "users-round",
-              "type": 1,
-              "sort": 1
-            },
-            {
-              "key": "user-config",
-              "name": "配置",
-              "icon": "settings",
-              "type": 1,
-              "sort": 2
-            },
-            {
-              "key": "user-benefit",
-              "name": "权益",
-              "icon": "badge-dollar-sign",
-              "type": 1,
-              "sort": 3,
-              "children": [
-                {
-                  "key": "user-benefit-assign",
-                  "name": "权益分配",
-                  "icon": "gift",
-                  "type": 1,
-                  "sort": 1
-                }
-              ]
-            }
-          ]
-        }
-      ]
+  "front": {
+    "public": [
+      "/user/auth/login",
+      "/user/auth/register",
+      "/user/auth/refresh"
+    ],
+    "sites": {
+      "admin": {
+        "auth": [
+          {
+            "key": "user-center",
+            "name": "用户中心",
+            "icon": "users-round",
+            "type": 1,
+            "sort": 2,
+            "children": [
+              {
+                "key": "user-user",
+                "name": "用户",
+                "icon": "users-round",
+                "type": 1,
+                "sort": 1
+              },
+              {
+                "key": "user-config",
+                "name": "配置",
+                "icon": "settings",
+                "type": 1,
+                "sort": 2
+              },
+              {
+                "key": "user-benefit",
+                "name": "权益",
+                "icon": "badge-dollar-sign",
+                "type": 1,
+                "sort": 3,
+                "children": [
+                  {
+                    "key": "user-benefit-assign",
+                    "name": "权益分配",
+                    "icon": "gift",
+                    "type": 1,
+                    "sort": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   }
 }

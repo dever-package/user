@@ -16,10 +16,18 @@ type Identity struct {
 }
 
 type IdentityIndex struct {
-	Name          struct{} `unique:"name"`
 	PurchasePoint struct{} `index:"purchase_point_id,status"`
 	StatusSort    struct{} `index:"status,sort,id"`
-	CreatedAt     struct{} `index:"created_at"`
+}
+
+var identitySeed = []map[string]any{
+	{
+		"id":                1,
+		"name":              "默认身份",
+		"purchase_point_id": 1,
+		"status":            1,
+		"sort":              100,
+	},
 }
 
 var identityPurchasePointRelation = orm.Relation{
@@ -32,6 +40,7 @@ var identityPurchasePointRelation = orm.Relation{
 func NewIdentityModel() *orm.Model[Identity] {
 	return orm.LoadModel[Identity]("身份", "identity", orm.ModelConfig{
 		Index:    IdentityIndex{},
+		Seeds:    identitySeed,
 		Order:    "sort asc,id asc",
 		Database: "default",
 		Options: map[string]any{

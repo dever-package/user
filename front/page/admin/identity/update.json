@@ -46,11 +46,6 @@
           {
             "type": "required",
             "message": "身份名称不能为空。"
-          },
-          {
-            "type": "model",
-            "except": "$form.id",
-            "message": "该身份名称已存在，请更换。"
           }
         ],
         "meta": {
@@ -96,7 +91,9 @@
       "data": {
         "id": "$form.id",
         "name": "$form.name",
-        "purchase_point_id": "$form.purchase_point_id"
+        "purchase_point_id": "$form.purchase_point_id",
+        "sort": "$form.sort",
+        "status": "$form.status"
       },
       "before": {
         "type": "service",
