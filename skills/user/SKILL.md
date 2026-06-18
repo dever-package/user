@@ -1,6 +1,6 @@
 ---
 name: dever-user
-description: Use when 修改 Dever user 组件，包括用户账号、认证、API key、credential、身份、权益、积分、token、middleware、API、Service、page JSON、权限、密钥和迁移行为。
+description: Use when 修改 Dever user 组件，包括用户账号、认证、API key、credential、身份、权益、积分、token、middleware、API、Service、page JSON、权限、密钥和升级影响。
 version: 0.1.0
 ---
 

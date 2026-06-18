@@ -66,7 +66,6 @@
         "id": "user-identity-list",
         "value": "search.identity_id",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadIdentities"
         },
         "meta": {
@@ -406,8 +405,7 @@
             "path": "user/identity/update",
             "params": "actionTarget.deleteIdentity",
             "before": {
-              "type": "service",
-              "use": "user.UserHook.BeforeDeleteIdentity"
+              "service": "user.UserHook.BeforeDeleteIdentity"
             }
           }
         }
@@ -425,8 +423,7 @@
             "path": "user/identity_level/update",
             "params": "actionTarget.deleteLevel",
             "before": {
-              "type": "service",
-              "use": "user.UserHook.BeforeDeleteIdentityLevel"
+              "service": "user.UserHook.BeforeDeleteIdentityLevel"
             }
           }
         }
@@ -447,17 +444,15 @@
       "keyword": ""
     },
     "table": {
-      "list": "<<user.NewIdentityLevelModel>>",
-      "page": 1,
       "pageSize": 200,
-      "total": 0,
       "searchFields": [
         "name"
       ],
       "filterFields": [
         "identity_id"
       ],
-      "order": "sort asc,level asc,id asc"
+      "order": "sort asc,level asc,id asc",
+      "model": "user.NewIdentityLevelModel"
     },
     "actionTarget": {
       "editIdentityId": "",

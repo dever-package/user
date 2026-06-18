@@ -56,7 +56,6 @@
   },
   "data": {
     "form": {
-      "_model": "user.NewIdentityLevelModel",
       "id": "",
       "identity_id": "",
       "name": "",
@@ -67,14 +66,14 @@
         "name",
         "level",
         "periodic_benefits"
-      ]
+      ],
+      "model": "user.NewIdentityLevelModel"
     }
   },
   "state": {},
   "action": {
     "submit": {
       "type": "save",
-      "use": "user.NewIdentityLevelModel",
       "upsert": true,
       "params": "form",
       "data": {
@@ -88,9 +87,9 @@
         "periodic_benefits": "$form.periodic_benefits"
       },
       "before": {
-        "type": "service",
-        "use": "user.BenefitService.BeforeSaveIdentityBenefit"
-      }
+        "service": "user.BenefitService.BeforeSaveIdentityBenefit"
+      },
+      "model": "user.NewIdentityLevelModel"
     }
   }
 }

@@ -58,7 +58,6 @@
         "mode": "form",
         "placeholder": "请选择购买积分",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadPointConfigs"
         },
         "validate": [
@@ -96,12 +95,10 @@
         "status": "$form.status"
       },
       "before": {
-        "type": "service",
-        "use": "user.UserHook.BeforeSaveIdentity"
+        "service": "user.UserHook.BeforeSaveIdentity"
       },
       "after": {
-        "type": "service",
-        "use": "user.UserHook.AfterSaveIdentity"
+        "service": "user.UserHook.AfterSaveIdentity"
       }
     }
   }

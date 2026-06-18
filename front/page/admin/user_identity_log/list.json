@@ -129,16 +129,13 @@
       "identity_id": ""
     },
     "table": {
-      "list": "<<user.NewUserIdentityLogModel>>",
-      "page": 1,
-      "pageSize": 10,
-      "total": 0,
       "filterFields": [
         "user_identity_id",
         "user_id",
         "identity_id"
       ],
-      "order": "id desc"
+      "order": "id desc",
+      "model": "user.NewUserIdentityLogModel"
     }
   },
   "state": {},

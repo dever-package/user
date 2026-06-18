@@ -261,8 +261,7 @@
             "path": "user/user/update",
             "params": "actionTarget.deleteUser",
             "before": {
-              "type": "service",
-              "use": "user.UserHook.BeforeDeleteUser"
+              "service": "user.UserHook.BeforeDeleteUser"
             }
           }
         }
@@ -279,9 +278,6 @@
       "status": ""
     },
     "table": {
-      "page": 1,
-      "pageSize": 10,
-      "total": 0,
       "searchFields": [
         "name",
         "mobile"

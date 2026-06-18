@@ -112,12 +112,10 @@
         "remark": "$form.remark"
       },
       "before": {
-        "type": "service",
-        "use": "user.UserHook.BeforeSaveUser"
+        "service": "user.UserHook.BeforeSaveUser"
       },
       "after": {
-        "type": "service",
-        "use": "user.UserHook.AfterSaveUser"
+        "service": "user.UserHook.AfterSaveUser"
       }
     }
   }

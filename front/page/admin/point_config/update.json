@@ -126,12 +126,10 @@
       "type": "save",
       "params": "form",
       "before": {
-        "type": "service",
-        "use": "user.UserHook.BeforeSavePointConfig"
+        "service": "user.UserHook.BeforeSavePointConfig"
       },
       "after": {
-        "type": "service",
-        "use": "user.UserHook.AfterSavePointConfig"
+        "service": "user.UserHook.AfterSavePointConfig"
       }
     }
   }

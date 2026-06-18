@@ -167,9 +167,6 @@
       "change_type": ""
     },
     "table": {
-      "page": 1,
-      "pageSize": 10,
-      "total": 0,
       "filterFields": [
         "user_point_id",
         "user_id",

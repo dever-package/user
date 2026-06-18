@@ -34,7 +34,6 @@
         "value": "form.user_id",
         "mode": "form",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadUsers",
           "pageSize": 20
         },
@@ -55,7 +54,6 @@
         "value": "form.point_config_id",
         "mode": "form",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadPointConfigs"
         },
         "validate": [
@@ -168,12 +166,11 @@
   "action": {
     "submit": {
       "type": "save",
-      "use": "user.NewUserPointModel",
       "params": "form",
       "before": {
-        "type": "service",
-        "use": "user.PointService.Adjust"
-      }
+        "service": "user.PointService.Adjust"
+      },
+      "model": "user.NewUserPointModel"
     }
   }
 }

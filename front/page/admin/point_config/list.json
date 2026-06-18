@@ -237,8 +237,7 @@
             "path": "user/point_config/update",
             "params": "actionTarget.deleteConfig",
             "before": {
-              "type": "service",
-              "use": "user.UserHook.BeforeDeletePointConfig"
+              "service": "user.UserHook.BeforeDeletePointConfig"
             }
           }
         }
@@ -254,9 +253,6 @@
       "keyword": ""
     },
     "table": {
-      "page": 1,
-      "pageSize": 10,
-      "total": 0,
       "searchFields": [
         "name"
       ],

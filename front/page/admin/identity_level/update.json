@@ -245,12 +245,10 @@
         "pay_amount": "$form.pay_amount"
       },
       "before": {
-        "type": "service",
-        "use": "user.UserHook.BeforeSaveIdentityLevel"
+        "service": "user.UserHook.BeforeSaveIdentityLevel"
       },
       "after": {
-        "type": "service",
-        "use": "user.UserHook.AfterSaveIdentityLevel"
+        "service": "user.UserHook.AfterSaveIdentityLevel"
       }
     }
   }

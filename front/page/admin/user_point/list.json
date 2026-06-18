@@ -83,7 +83,6 @@
         "value": "search.point_config_id",
         "mode": "search",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadPointConfigs"
         },
         "meta": {
@@ -237,10 +236,6 @@
       "point_config_id": ""
     },
     "table": {
-      "list": "<<user.NewUserPointModel>>",
-      "page": 1,
-      "pageSize": 10,
-      "total": 0,
       "searchFields": [
         "user_name",
         "user_mobile"
@@ -250,7 +245,8 @@
         "point_config_id"
       ],
       "service": "user.PointService.AttachUserInfo",
-      "order": "id desc"
+      "order": "id desc",
+      "model": "user.NewUserPointModel"
     },
     "actionTarget": {
       "adjustPoint": {}

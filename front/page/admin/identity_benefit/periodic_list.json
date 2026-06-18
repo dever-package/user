@@ -268,7 +268,9 @@
       "description": "配置定期发放的权益。"
     },
     "option": {
-      "point_config": "{{user.UserOptionService.LoadPointConfigs}}",
+      "point_config": {
+        "service": "user.UserOptionService.LoadPointConfigs"
+      },
       "clear_previous": [
         {
           "id": 1,

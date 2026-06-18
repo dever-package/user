@@ -76,7 +76,6 @@
         "value": "search.identity_id",
         "mode": "search",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadIdentities"
         },
         "meta": {
@@ -209,10 +208,6 @@
       "identity_id": ""
     },
     "table": {
-      "list": "<<user.NewUserIdentityModel>>",
-      "page": 1,
-      "pageSize": 10,
-      "total": 0,
       "searchFields": [
         "user_name",
         "user_mobile"
@@ -222,7 +217,8 @@
         "identity_id"
       ],
       "service": "user.PointService.AttachUserIdentityListInfo",
-      "order": "id desc"
+      "order": "id desc",
+      "model": "user.NewUserIdentityModel"
     },
     "actionTarget": {}
   },

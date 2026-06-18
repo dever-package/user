@@ -34,10 +34,6 @@
           }
         ],
         "meta": {
-          "api": "/front/route/option",
-          "type": "service",
-          "use": "user.UserOptionService.LoadBenefitTypes",
-          "childUse": "user.UserOptionService.LoadBenefitItems",
           "childParentField": "benefit_type",
           "childExtraFields": "benefit_type",
           "valueMode": "leaf",
@@ -46,7 +42,9 @@
             "选择权益"
           ],
           "formLayout": "horizontal",
-          "controlClassName": "max-w-[360px]"
+          "controlClassName": "max-w-[360px]",
+          "service": "user.UserOptionService.LoadBenefitTypes",
+          "childService": "user.UserOptionService.LoadBenefitItems"
         }
       },
       {

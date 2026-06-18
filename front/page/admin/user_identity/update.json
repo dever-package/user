@@ -36,7 +36,6 @@
         "mode": "form",
         "placeholder": "请选择用户",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadUsers",
           "pageSize": 20
         },
@@ -59,13 +58,15 @@
         "mode": "form",
         "placeholder": "请选择身份和等级",
         "meta": {
-          "api": "/front/route/option",
-          "use": "user.NewIdentityModel",
-          "childUse": "user.NewIdentityLevelModel",
           "childParentField": "identity_id",
           "valueMode": "leaf",
-          "placeholder": ["选择身份", "选择等级"],
-          "formLayout": "horizontal"
+          "placeholder": [
+            "选择身份",
+            "选择等级"
+          ],
+          "formLayout": "horizontal",
+          "model": "user.NewIdentityModel",
+          "childModel": "user.NewIdentityLevelModel"
         },
         "validate": [
           {
@@ -119,8 +120,7 @@
         "remark": "$form.remark"
       },
       "before": {
-        "type": "service",
-        "use": "user.UserIdentityService.Create"
+        "service": "user.UserIdentityService.Create"
       }
     }
   }

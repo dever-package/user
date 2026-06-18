@@ -52,7 +52,6 @@
         "value": "search.identity_id",
         "mode": "search",
         "option": {
-          "type": "service",
           "service": "user.UserOptionService.LoadIdentities"
         },
         "meta": {
@@ -184,10 +183,6 @@
       "identity_id": ""
     },
     "table": {
-      "list": "<<user.NewIdentityLevelModel>>",
-      "page": 1,
-      "pageSize": 10,
-      "total": 0,
       "searchFields": [
         "name"
       ],
@@ -195,7 +190,8 @@
         "identity_id"
       ],
       "service": "user.BenefitService.AttachIdentityBenefitSummary",
-      "order": "identity_id asc,sort asc,level asc,id asc"
+      "order": "identity_id asc,sort asc,level asc,id asc",
+      "model": "user.NewIdentityLevelModel"
     },
     "actionTarget": {
       "editLevel": {}
