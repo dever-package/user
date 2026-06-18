@@ -1,46 +1,46 @@
 ---
 name: dever-user
-description: This skill should be used when editing the Dever user package, including user account, auth, API key, credential, identity, benefit, point, token, middleware, user APIs, user services, user page JSON, permissions, secrets, and migration behavior.
+description: Use when 修改 Dever user 组件，包括用户账号、认证、API key、credential、身份、权益、积分、token、middleware、API、Service、page JSON、权限、密钥和迁移行为。
 version: 0.1.0
 ---
 
-# User Package
+# User 组件
 
-Use this component skill together with `shemic-dever`. Read `shemic-dever` first for framework rules, then apply these user-specific boundaries.
+本组件 skill 必须和 `shemic-dever` 一起使用。先遵守 Dever 框架规则，再按这里的 user 组件边界修改。
 
-## Source Of Truth
+## 事实来源
 
-- Package source: `backend/package/user`
-- Component metadata: `backend/package/user/dever.json`
-- Models: `model`
-- Services: `service`
-- APIs: `api`
-- Auth context: `authctx`
-- Middleware: `middleware`
-- Pages: `front/page`
+- 组件源码：`backend/package/user`
+- 组件声明：`backend/package/user/dever.json`
+- Model：`model`
+- Service：`service`
+- API：`api`
+- Auth context：`authctx`
+- Middleware：`middleware`
+- 后台页面：`front/page`
 
-## Hard Rules
+## 硬规则
 
-- Do not expose account, token, credential, API key, identity, point, or benefit mutations through generic unsafe actions.
-- Do not log secrets, tokens, passwords, API keys, or credential payloads.
-- Do not place real secrets in templates, page JSON, or source.
-- API handlers stay thin; auth, token, identity, point, benefit, and API-key rules belong in services.
-- Middleware must remain focused on authentication/context injection and avoid project-specific business rules.
-- Ordinary admin list/update pages should use package/front and model metadata when safe.
+- 不通过不安全的通用 action 暴露 account、token、credential、API key、identity、point 或 benefit 变更。
+- 不记录 secret、token、password、API key 或 credential payload。
+- 模板、page JSON 和源码里不放真实密钥。
+- API handler 保持薄；auth、token、identity、point、benefit 和 API key 规则放 Service。
+- Middleware 只做认证和上下文注入，避免放项目私有业务规则。
+- 普通后台 list/update 页面在安全前提下使用 package/front 和 model 元信息。
 
-## Service/API Rules
+## Service/API 规则
 
-- `service/auth`: login, token, session, credential behavior.
-- `service/api_key`: API key creation, validation, masking, rotation.
-- `service/identity`: identity and level behavior.
-- `service/point`: point accounting and logs.
-- `service/benefit`: benefit grant/issue behavior.
-- `authctx`: request actor/API-key context only.
+- `service/auth`：登录、token、session、credential 行为。
+- `service/api_key`：API key 创建、校验、脱敏和轮换。
+- `service/identity`：身份和等级行为。
+- `service/point`：积分记账和日志。
+- `service/benefit`：权益发放和核销。
+- `authctx`：只放请求 actor / API key 上下文。
 
-Use transactions or idempotency for point, benefit, and identity changes.
+积分、权益和身份变更必须考虑事务或幂等。
 
-## Common Checks
+## 常见检查
 
-- Permission errors: inspect site access, user middleware, and page/action auth before changing model/action rules.
-- Credential bugs: check secret hashing/masking paths before returning data to frontend.
-- API key bugs: never return full secret after creation unless existing service explicitly supports one-time display.
+- 权限错误：先查站点 access、user middleware 和 page/action auth，再改 model/action 规则。
+- Credential 问题：向前端返回数据前，先查 secret hash 和脱敏路径。
+- API key 问题：除非现有 Service 明确支持一次性展示，否则不要返回完整 secret。
