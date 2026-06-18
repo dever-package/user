@@ -6,7 +6,7 @@
     "front": ">=0.1.0"
   },
   "skills": [
-    "skills/user/SKILL.md"
+    "skills/SKILL.md"
   ],
   "front": {
     "public": [
