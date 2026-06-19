@@ -130,27 +130,47 @@ func (AuthService) Refresh(ctx context.Context, refreshToken string) (map[string
 		return nil, fmt.Errorf("刷新Token不能为空")
 	}
 
-	tokenModel := usermodel.NewTokenModel()
-	tokenRow := tokenModel.Find(ctx, map[string]any{
-		"type":       usermodel.TokenTypeRefresh,
-		"token_hash": hashSecret(refreshToken),
-		"status":     usermodel.TokenStatusEnabled,
-	})
-	if tokenRow == nil || !tokenRow.ExpiresAt.After(time.Now()) {
-		return nil, NewAuthRequiredError("刷新Token无效")
-	}
+	var payload map[string]any
+	if err := orm.Transaction(ctx, func(tx context.Context) error {
+		tokenModel := usermodel.NewTokenModel()
+		tokenRow := tokenModel.Find(tx, map[string]any{
+			"type":       usermodel.TokenTypeRefresh,
+			"token_hash": hashSecret(refreshToken),
+			"status":     usermodel.TokenStatusEnabled,
+		})
+		if tokenRow == nil || !tokenRow.ExpiresAt.After(time.Now()) {
+			return NewAuthRequiredError("刷新Token无效")
+		}
 
-	user := usermodel.NewUserModel().Find(ctx, map[string]any{
-		"id":     tokenRow.UserID,
-		"status": usermodel.UserStatusEnabled,
-	})
-	if user == nil {
-		return nil, NewAuthRequiredError("用户不存在或已停用")
+		user := usermodel.NewUserModel().Find(tx, map[string]any{
+			"id":     tokenRow.UserID,
+			"status": usermodel.UserStatusEnabled,
+		})
+		if user == nil {
+			return NewAuthRequiredError("用户不存在或已停用")
+		}
+
+		updated := tokenModel.Update(tx, map[string]any{
+			"id":     tokenRow.ID,
+			"status": usermodel.TokenStatusEnabled,
+		}, map[string]any{
+			"status":  usermodel.TokenStatusRevoked,
+			"used_at": time.Now(),
+		})
+		if updated == 0 {
+			return NewAuthRequiredError("刷新Token无效")
+		}
+
+		nextPayload, err := authPayload(tx, user, "")
+		if err != nil {
+			return err
+		}
+		payload = nextPayload
+		return nil
+	}); err != nil {
+		return nil, err
 	}
-	tokenModel.Update(ctx, map[string]any{"id": tokenRow.ID}, map[string]any{
-		"used_at": time.Now(),
-	})
-	return authPayload(ctx, user, "")
+	return payload, nil
 }
 
 func (AuthService) Logout(ctx context.Context, refreshToken string) (map[string]any, error) {
