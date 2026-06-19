@@ -8,7 +8,7 @@ import (
 
 	deverjwt "github.com/shemic/dever/auth/jwt"
 
-	usermodel "my/package/user/model"
+	usermodel "github.com/dever-package/user/model"
 )
 
 const (

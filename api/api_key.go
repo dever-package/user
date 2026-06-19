@@ -6,7 +6,7 @@ import (
 	"github.com/shemic/dever/server"
 	"github.com/shemic/dever/util"
 
-	userservice "my/package/user/service"
+	userservice "github.com/dever-package/user/service"
 )
 
 type ApiKey struct{}

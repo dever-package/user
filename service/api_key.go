@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	usermodel "my/package/user/model"
+	usermodel "github.com/dever-package/user/model"
 )
 
 type APIKeyService struct{}

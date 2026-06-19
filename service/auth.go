@@ -12,7 +12,7 @@ import (
 	"github.com/shemic/dever/config"
 	"github.com/shemic/dever/orm"
 
-	usermodel "my/package/user/model"
+	usermodel "github.com/dever-package/user/model"
 )
 
 const (

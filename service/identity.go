@@ -11,9 +11,9 @@ import (
 	"github.com/shemic/dever/server"
 	"github.com/shemic/dever/util"
 
-	frontaction "my/package/front/service/action"
-	frontrecord "my/package/front/service/record"
-	usermodel "my/package/user/model"
+	frontaction "github.com/dever-package/front/service/action"
+	frontrecord "github.com/dever-package/front/service/record"
+	usermodel "github.com/dever-package/user/model"
 )
 
 const (

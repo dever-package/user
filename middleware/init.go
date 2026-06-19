@@ -9,8 +9,8 @@ import (
 	coremiddleware "github.com/shemic/dever/middleware"
 	"github.com/shemic/dever/server"
 
-	"my/package/user/authctx"
-	userservice "my/package/user/service"
+	"github.com/dever-package/user/authctx"
+	userservice "github.com/dever-package/user/service"
 )
 
 var registerOnce sync.Once

@@ -8,7 +8,7 @@ import (
 
 	"github.com/shemic/dever/util"
 
-	usermodel "my/package/user/model"
+	usermodel "github.com/dever-package/user/model"
 )
 
 type identityBenefitIssueStats struct {
