@@ -58,7 +58,7 @@ var identityBenefitPointRelation = orm.Relation{
 }
 
 func NewIdentityBenefitModel() *orm.Model[IdentityBenefit] {
-	return orm.LoadModel[IdentityBenefit]("身份权益", "identity_benefit", orm.ModelConfig{
+	return orm.LoadModel[IdentityBenefit]("身份权益", "user_identity_benefit", orm.ModelConfig{
 		Index:    IdentityBenefitIndex{},
 		Order:    "identity_id asc,level asc,sort asc,id asc",
 		Database: "default",

@@ -28,7 +28,7 @@ var pointConfigSeed = []map[string]any{
 }
 
 func NewPointConfigModel() *orm.Model[PointConfig] {
-	return orm.LoadModel[PointConfig]("积分配置", "point_config", orm.ModelConfig{
+	return orm.LoadModel[PointConfig]("积分配置", "user_point_config", orm.ModelConfig{
 		Seeds:    pointConfigSeed,
 		Order:    "id desc",
 		Database: "default",

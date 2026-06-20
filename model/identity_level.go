@@ -43,7 +43,7 @@ var identityLevelBenefitRelation = orm.Relation{
 }
 
 func NewIdentityLevelModel() *orm.Model[IdentityLevel] {
-	return orm.LoadModel[IdentityLevel]("身份等级", "identity_level", orm.ModelConfig{
+	return orm.LoadModel[IdentityLevel]("身份等级", "user_identity_level", orm.ModelConfig{
 		Index:    IdentityLevelIndex{},
 		Order:    "identity_id asc,sort asc,level asc,id asc",
 		Database: "default",

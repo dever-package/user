@@ -38,7 +38,7 @@ var identityPurchasePointRelation = orm.Relation{
 }
 
 func NewIdentityModel() *orm.Model[Identity] {
-	return orm.LoadModel[Identity]("身份", "identity", orm.ModelConfig{
+	return orm.LoadModel[Identity]("身份", "user_identity_type", orm.ModelConfig{
 		Index:    IdentityIndex{},
 		Seeds:    identitySeed,
 		Order:    "sort asc,id asc",

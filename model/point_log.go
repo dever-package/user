@@ -58,7 +58,7 @@ var pointLogConfigRelation = orm.Relation{
 }
 
 func NewPointLogModel() *orm.Model[PointLog] {
-	return orm.LoadModel[PointLog]("积分日志", "point_log", orm.ModelConfig{
+	return orm.LoadModel[PointLog]("积分日志", "user_point_log", orm.ModelConfig{
 		Index:    PointLogIndex{},
 		Order:    "id desc",
 		Database: "default",
