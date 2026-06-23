@@ -22,7 +22,7 @@
             "name": "用户中心",
             "icon": "users-round",
             "type": 1,
-            "sort": 2,
+            "sort": 20,
             "children": [
               {
                 "key": "user-user",
