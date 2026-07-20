@@ -42,6 +42,13 @@ var identityLevelBenefitRelation = orm.Relation{
 	Order:      "sort asc,id asc",
 }
 
+var identityLevelBillingBenefitRelation = orm.Relation{
+	Field:      "billing_benefits",
+	Through:    "user.NewIdentityBillingBenefitModel",
+	OwnerField: "level_id",
+	Order:      "sort asc,id asc",
+}
+
 func NewIdentityLevelModel() *orm.Model[IdentityLevel] {
 	return orm.LoadModel[IdentityLevel]("身份等级", "user_identity_level", orm.ModelConfig{
 		Index:    IdentityLevelIndex{},
@@ -56,6 +63,7 @@ func NewIdentityLevelModel() *orm.Model[IdentityLevel] {
 		Relations: []orm.Relation{
 			identityLevelIdentityRelation,
 			identityLevelBenefitRelation,
+			identityLevelBillingBenefitRelation,
 		},
 	})
 }

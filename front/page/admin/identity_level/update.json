@@ -131,6 +131,7 @@
         "value": "form.upgrade_method",
         "mode": "form",
         "option": "option.upgrade_method",
+        "info": "选择“注册”后，新用户通过注册接口创建账号时会自动获得该等级；同一身份只能启用一个注册等级。",
         "validate": [
           {
             "type": "required",
@@ -242,7 +243,9 @@
         "duration_type": "$form.duration_type",
         "upgrade_method": "$form.upgrade_method",
         "pay_type": "$form.pay_type",
-        "pay_amount": "$form.pay_amount"
+        "pay_amount": "$form.pay_amount",
+        "status": "$form.status",
+        "sort": "$form.sort"
       },
       "before": {
         "service": "user.UserHook.BeforeSaveIdentityLevel"

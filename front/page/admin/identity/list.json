@@ -66,7 +66,7 @@
         "id": "user-identity-list",
         "value": "search.identity_id",
         "option": {
-          "service": "user.UserOptionService.LoadIdentities"
+          "service": "user.UserOptionService.LoadAllIdentities"
         },
         "meta": {
           "title": "身份",
@@ -137,26 +137,6 @@
                   {
                     "type": "modal",
                     "key": "dialog.editIdentity",
-                    "value": true
-                  }
-                ]
-              }
-            },
-            {
-              "icon": "trash-2",
-              "variant": "ghost",
-              "size": "sm",
-              "description": "删除身份",
-              "action": {
-                "click": [
-                  {
-                    "type": "data",
-                    "key": "actionTarget.deleteIdentity",
-                    "value": "$row"
-                  },
-                  {
-                    "type": "modal",
-                    "key": "confirm.deleteIdentity",
                     "value": true
                   }
                 ]
@@ -394,24 +374,6 @@
       },
       {
         "type": "feedback-confirm",
-        "name": "删除身份",
-        "info": "确认删除当前身份吗？身份下仍有等级时会阻止删除。",
-        "meta": {
-          "stateKey": "confirm.deleteIdentity"
-        },
-        "action": {
-          "confirm": {
-            "type": "delete",
-            "path": "user/identity/update",
-            "params": "actionTarget.deleteIdentity",
-            "before": {
-              "service": "user.UserHook.BeforeDeleteIdentity"
-            }
-          }
-        }
-      },
-      {
-        "type": "feedback-confirm",
         "name": "删除等级",
         "info": "确认删除当前等级吗？",
         "meta": {
@@ -456,7 +418,6 @@
     },
     "actionTarget": {
       "editIdentityId": "",
-      "deleteIdentity": {},
       "editLevelId": "",
       "deleteLevel": {}
     }
@@ -469,7 +430,6 @@
       "editLevel": false
     },
     "confirm": {
-      "deleteIdentity": false,
       "deleteLevel": false
     }
   },

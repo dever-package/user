@@ -1,9 +1,9 @@
 {
   "page": {
-    "name": "周期权益",
+    "name": "计费权益",
     "parent": "user/identity_benefit/list",
     "type": 2,
-    "sort": 12
+    "sort": 13
   },
   "layout": {
     "type": "container",
@@ -36,7 +36,7 @@
     "header-actions": [
       {
         "type": "show-button",
-        "name": "添加周期权益",
+        "name": "添加计费权益",
         "meta": {
           "variant": "outline",
           "size": "sm"
@@ -45,26 +45,25 @@
           "click": [
             {
               "type": "state",
-              "key": "periodicBenefitIndex",
+              "key": "billingBenefitIndex",
               "value": -1
             },
             {
               "type": "state",
-              "key": "periodicBenefitForm",
+              "key": "billingBenefitForm",
               "value": {
-                "benefit_type": "reward_point",
                 "point_config_id": 1,
-                "point_amount": 1,
-                "cycle_days": 1,
-                "limit_times": 1,
-                "clear_previous": 1,
+                "scope": "all",
+                "power_cate_id": 0,
+                "power_ids": [],
+                "sale_ratio": "1",
                 "status": 1,
                 "sort": 100
               }
             },
             {
               "type": "modal",
-              "key": "dialog.periodicBenefit",
+              "key": "dialog.billingBenefit",
               "value": true
             }
           ]
@@ -74,12 +73,12 @@
     "table-row": [
       {
         "type": "show-table",
-        "value": "parent.data.form.periodic_benefits",
+        "value": "parent.data.form.billing_benefits",
         "meta": {
           "rowKey": "id",
           "columns": [
             {
-              "name": "权益",
+              "name": "扣费积分",
               "value": "point_config_id",
               "type": "show-tag",
               "className": "text-center",
@@ -88,31 +87,19 @@
               }
             },
             {
-              "name": "数量",
-              "value": "point_amount",
-              "type": "show-base",
-              "className": "text-center"
-            },
-            {
-              "name": "天数",
-              "value": "cycle_days",
-              "type": "show-base",
-              "className": "text-center"
-            },
-            {
-              "name": "上限次数",
-              "value": "limit_times",
-              "type": "show-base",
-              "className": "text-center"
-            },
-            {
-              "name": "清空上次权益",
-              "value": "clear_previous",
+              "name": "范围",
+              "value": "scope",
               "type": "show-tag",
               "className": "text-center",
               "meta": {
-                "option": "option.clear_previous"
+                "option": "option.scope"
               }
+            },
+            {
+              "name": "售价系数",
+              "value": "sale_ratio",
+              "type": "show-base",
+              "className": "text-center"
             },
             {
               "name": "启用",
@@ -121,7 +108,7 @@
               "action": {
                 "change": {
                   "type": "array",
-                  "key": "parent.data.form.periodic_benefits",
+                  "key": "parent.data.form.billing_benefits",
                   "op": "patch",
                   "index": "$rowIndex",
                   "value": {
@@ -143,7 +130,7 @@
               "action": {
                 "change": {
                   "type": "array",
-                  "key": "parent.data.form.periodic_benefits",
+                  "key": "parent.data.form.billing_benefits",
                   "op": "patch",
                   "index": "$rowIndex",
                   "value": {
@@ -165,27 +152,22 @@
                     "icon": "square-pen",
                     "variant": "outline",
                     "size": "sm",
-                    "description": "编辑周期权益",
+                    "description": "编辑计费权益",
                     "action": {
                       "click": [
                         {
                           "type": "state",
-                          "key": "periodicBenefitIndex",
+                          "key": "billingBenefitIndex",
                           "value": "$rowIndex"
                         },
                         {
                           "type": "state",
-                          "key": "periodicBenefitForm",
+                          "key": "billingBenefitForm",
                           "value": "$row"
                         },
                         {
-                          "type": "state",
-                          "key": "periodicBenefitForm.benefit_type",
-                          "value": "reward_point"
-                        },
-                        {
                           "type": "modal",
-                          "key": "dialog.periodicBenefit",
+                          "key": "dialog.billingBenefit",
                           "value": true
                         }
                       ]
@@ -195,18 +177,18 @@
                     "icon": "trash-2",
                     "variant": "outline",
                     "size": "sm",
-                    "description": "删除周期权益",
+                    "description": "删除计费权益",
                     "className": "text-destructive hover:text-destructive",
                     "action": {
                       "click": [
                         {
                           "type": "state",
-                          "key": "deleteBenefitIndex",
+                          "key": "deleteBillingBenefitIndex",
                           "value": "$rowIndex"
                         },
                         {
                           "type": "modal",
-                          "key": "dialog.deleteBenefit",
+                          "key": "dialog.deleteBillingBenefit",
                           "value": true
                         }
                       ]
@@ -221,43 +203,43 @@
       {
         "type": "feedback-modal",
         "meta": {
-          "stateKey": "dialog.periodicBenefit",
-          "pageRoute": "/user/identity_benefit/periodic",
-          "title": "周期权益",
-          "description": "当前只支持奖励积分。",
+          "stateKey": "dialog.billingBenefit",
+          "pageRoute": "/user/identity_benefit/billing",
+          "title": "计费权益",
+          "description": "按供应商成本和售价系数计算用户应扣积分。",
           "size": "lg",
           "footer": {
             "confirm": true,
             "confirmText": "确定"
           },
           "pageDataPatches": {
-            "form": "state.periodicBenefitForm"
+            "form": "state.billingBenefitForm"
           }
         },
         "action": {
           "submit": {
             "type": "array",
-            "key": "parent.data.form.periodic_benefits",
+            "key": "parent.data.form.billing_benefits",
             "op": "upsert",
-            "index": "state.periodicBenefitIndex",
+            "index": "state.billingBenefitIndex",
             "value": "$modalForm"
           }
         }
       },
       {
         "type": "feedback-confirm",
-        "name": "删除周期权益",
-        "info": "确认删除这一条周期权益吗？删除后当前行内容将被移除。",
+        "name": "删除计费权益",
+        "info": "确认删除这一条计费权益吗？删除后当前行内容将被移除。",
         "meta": {
-          "stateKey": "dialog.deleteBenefit",
-          "successMessage": "周期权益已删除"
+          "stateKey": "dialog.deleteBillingBenefit",
+          "successMessage": "计费权益已删除"
         },
         "action": {
           "confirm": {
             "type": "array",
-            "key": "parent.data.form.periodic_benefits",
+            "key": "parent.data.form.billing_benefits",
             "op": "remove",
-            "index": "state.deleteBenefitIndex"
+            "index": "state.deleteBillingBenefitIndex"
           }
         }
       }
@@ -265,51 +247,40 @@
   },
   "data": {
     "page": {
-      "title": "周期权益",
-      "description": "配置定期发放的权益。"
+      "title": "计费权益",
+      "description": "配置能力调用使用的积分和售价系数。"
     },
     "option": {
       "point_config": {
         "service": "user.UserOptionService.LoadPointConfigs"
       },
-      "clear_previous": [
+      "scope": [
         {
-          "id": 1,
-          "value": "清空"
+          "id": "all",
+          "value": "全部能力"
         },
         {
-          "id": 2,
-          "value": "不清空"
-        }
-      ],
-      "status": [
-        {
-          "id": 1,
-          "value": "开启"
-        },
-        {
-          "id": 2,
-          "value": "停用"
+          "id": "specified",
+          "value": "指定能力"
         }
       ]
     }
   },
   "state": {
-    "periodicBenefitIndex": -1,
-    "deleteBenefitIndex": -1,
-    "periodicBenefitForm": {
-      "benefit_type": "reward_point",
+    "billingBenefitIndex": -1,
+    "deleteBillingBenefitIndex": -1,
+    "billingBenefitForm": {
       "point_config_id": 1,
-      "point_amount": 1,
-      "cycle_days": 1,
-      "limit_times": 1,
-      "clear_previous": 1,
+      "scope": "all",
+      "power_cate_id": 0,
+      "power_ids": [],
+      "sale_ratio": "1",
       "status": 1,
       "sort": 100
     },
     "dialog": {
-      "periodicBenefit": false,
-      "deleteBenefit": false
+      "billingBenefit": false,
+      "deleteBillingBenefit": false
     }
   },
   "action": {}

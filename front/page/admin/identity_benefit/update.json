@@ -25,6 +25,11 @@
                 "type": "container",
                 "path": "/user/identity_benefit/periodic_list",
                 "className": "mt-5"
+              },
+              "billing-benefit-page": {
+                "type": "container",
+                "path": "/user/identity_benefit/billing_list",
+                "className": "mt-5"
               }
             }
           }
@@ -61,12 +66,15 @@
       "name": "",
       "level": 0,
       "periodic_benefits": [],
+      "billing_benefits": [],
       "_fields": [
         "identity_id",
         "name",
         "level",
-        "periodic_benefits"
+        "periodic_benefits",
+        "billing_benefits"
       ],
+      "service": "user.BenefitService.AttachIdentityBenefitForm",
       "model": "user.NewIdentityLevelModel"
     }
   },
@@ -84,7 +92,8 @@
         "level_name": "$form.name",
         "level": "$form.level",
         "_virtual": true,
-        "periodic_benefits": "$form.periodic_benefits"
+        "periodic_benefits": "$form.periodic_benefits",
+        "billing_benefits": "$form.billing_benefits"
       },
       "before": {
         "service": "user.BenefitService.BeforeSaveIdentityBenefit"

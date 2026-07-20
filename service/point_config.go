@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	pointSymbolBefore = 1
-	pointSymbolAfter  = 2
+	pointSymbolBefore    = 1
+	pointSymbolAfter     = 2
+	maxPointExchangeRate = 1_000_000
 )
 
 func (UserHook) ProviderBeforeSavePointConfig(_ *server.Context, params []any) any {
@@ -28,6 +29,9 @@ func (UserHook) ProviderBeforeSavePointConfig(_ *server.Context, params []any) a
 	exchangeRate := util.ToIntDefault(payload["exchange_rate"], 100)
 	if exchangeRate < 0 {
 		panic(frontaction.NewFieldError("form.exchange_rate", "货币换算不能小于 0。"))
+	}
+	if exchangeRate > maxPointExchangeRate {
+		panic(frontaction.NewFieldError("form.exchange_rate", "货币换算不能超过 1000000。"))
 	}
 	payload["exchange_rate"] = exchangeRate
 	payload["symbol"] = strings.TrimSpace(util.ToString(payload["symbol"]))
@@ -67,8 +71,14 @@ func (UserHook) ProviderBeforeDeletePointConfig(c *server.Context, params []any)
 	if usermodel.NewPointLogModel().Count(c.Context(), map[string]any{"point_config_id": pointConfigID}) > 0 {
 		panic("当前积分配置已有积分日志，不能删除。")
 	}
+	if usermodel.NewPointHoldModel().Count(c.Context(), map[string]any{"point_config_id": pointConfigID}) > 0 {
+		panic("当前积分配置已有积分预占记录，不能删除。")
+	}
 	if usermodel.NewIdentityBenefitModel().Count(c.Context(), map[string]any{"point_config_id": pointConfigID}) > 0 {
 		panic("当前积分配置已用于身份权益，请先移除周期权益。")
+	}
+	if usermodel.NewIdentityBillingBenefitModel().Count(c.Context(), map[string]any{"point_config_id": pointConfigID}) > 0 {
+		panic("当前积分配置已用于计费权益，请先移除计费权益。")
 	}
 	if usermodel.NewUserBenefitGrantModel().Count(c.Context(), map[string]any{"point_config_id": pointConfigID}) > 0 {
 		panic("当前积分配置已有权益发放记录，不能删除。")

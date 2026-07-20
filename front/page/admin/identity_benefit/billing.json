@@ -1,0 +1,224 @@
+{
+  "page": {
+    "name": "计费权益编辑",
+    "parent": "user/identity_benefit/list",
+    "type": 2
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-cascader",
+        "name": "权益",
+        "placeholder": "请选择扣费积分",
+        "value": "form.point_config_id",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "扣费积分不能为空。"
+          }
+        ],
+        "meta": {
+          "childParentField": "benefit_type",
+          "childExtraFields": "benefit_type",
+          "valueMode": "leaf",
+          "placeholder": [
+            "选择类型",
+            "选择积分"
+          ],
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[360px]",
+          "service": "user.UserOptionService.LoadBenefitTypes",
+          "childService": "user.UserOptionService.LoadBenefitItems"
+        }
+      },
+      {
+        "type": "form-cascader",
+        "name": "类型",
+        "placeholder": "请选择计费类型",
+        "value": "form.scope",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "计费类型不能为空。"
+          }
+        ],
+        "meta": {
+          "childParentField": "billing_type",
+          "childExtraFields": "billing_type",
+          "valueMode": "leaf",
+          "placeholder": [
+            "选择类型",
+            "选择范围"
+          ],
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[360px]",
+          "service": "user.UserOptionService.LoadBillingTypes",
+          "childService": "user.UserOptionService.LoadBillingScopes"
+        }
+      },
+      {
+        "type": "form-select",
+        "name": "能力分类",
+        "value": "form.power_cate_id",
+        "mode": "form",
+        "placeholder": "请选择能力分类",
+        "option": {
+          "model": "bot.energon.NewPowerCateModel",
+          "filters": {
+            "status": 1
+          },
+          "order": "sort asc,id asc"
+        },
+        "validate": [
+          {
+            "type": "required",
+            "message": "能力分类不能为空。",
+            "when": [
+              {
+                "path": "form.scope",
+                "operator": "equals",
+                "value": "specified"
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[320px]",
+          "clearOnChange": [
+            "form.power_ids"
+          ],
+          "showWhen": [
+            {
+              "path": "form.scope",
+              "operator": "equals",
+              "value": "specified"
+            }
+          ]
+        }
+      },
+      {
+        "type": "form-select",
+        "name": "能力",
+        "value": "form.power_ids",
+        "mode": "form",
+        "placeholder": "请选择一个或多个能力",
+        "option": {
+          "model": "bot.energon.NewPowerModel",
+          "filters": {
+            "status": 1
+          },
+          "order": "cate_id asc,id asc",
+          "extraFields": [
+            "cate_id",
+            "key",
+            "kind",
+            "status"
+          ]
+        },
+        "validate": [
+          {
+            "type": "required",
+            "message": "指定能力不能为空。",
+            "when": [
+              {
+                "path": "form.scope",
+                "operator": "equals",
+                "value": "specified"
+              }
+            ]
+          }
+        ],
+        "meta": {
+          "multiple": true,
+          "formLayout": "horizontal",
+          "searchPlaceholder": "输入能力名称搜索...",
+          "controlClassName": "max-w-[480px]",
+          "optionFilter": [
+            {
+              "field": "cate_id",
+              "path": "form.power_cate_id",
+              "operator": "equals"
+            }
+          ],
+          "showWhen": [
+            {
+              "path": "form.scope",
+              "operator": "equals",
+              "value": "specified"
+            }
+          ]
+        }
+      },
+      {
+        "type": "form-input",
+        "name": "售价系数",
+        "placeholder": "例如 1、0.8、2",
+        "value": "form.sale_ratio",
+        "mode": "form",
+        "info": "供应商实际成本乘以售价系数后，再按所选积分的货币换算比例扣费。0 表示免费，1 表示按成本，2 表示成本的两倍。",
+        "validate": [
+          {
+            "type": "required",
+            "message": "售价系数不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[200px]"
+        }
+      },
+      {
+        "type": "form-switch",
+        "name": "状态",
+        "value": "form.status",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal",
+          "trueValue": 1,
+          "falseValue": 2
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "排序",
+        "value": "form.sort",
+        "mode": "form",
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[160px]"
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "point_config_id": 1,
+      "scope": "all",
+      "power_cate_id": 0,
+      "power_ids": [],
+      "sale_ratio": "1",
+      "status": 1,
+      "sort": 100
+    }
+  },
+  "state": {},
+  "action": {}
+}

@@ -83,6 +83,13 @@ func (AuthService) Register(ctx context.Context, req RegisterRequest) (map[strin
 		if credentialID == 0 {
 			return fmt.Errorf("注册失败")
 		}
+		if err := initializeRegistrationBenefits(tx, userID, map[string]any{
+			"id":     userID,
+			"name":   name,
+			"mobile": "",
+		}, now); err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
 		return nil, err

@@ -145,7 +145,18 @@
       "balance": 0,
       "change_type": "increase",
       "amount": 1,
-      "remark": ""
+      "remark": "",
+      "operation_key": "",
+      "_fields": [
+        "user_id",
+        "point_config_id",
+        "balance",
+        "change_type",
+        "amount",
+        "remark",
+        "operation_key"
+      ],
+      "service": "user.PointService.AttachAdjustmentForm"
     },
     "option": {
       "change_type": [

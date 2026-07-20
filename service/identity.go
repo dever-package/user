@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"strings"
 	"time"
@@ -36,12 +37,20 @@ type UserOptionService struct{}
 type UserIdentityService struct{}
 
 func (UserOptionService) ProviderLoadIdentities(c *server.Context, _ []any) any {
+	return loadIdentityOptions(c, map[string]any{"status": identityStatusEnabled})
+}
+
+func (UserOptionService) ProviderLoadAllIdentities(c *server.Context, _ []any) any {
+	return loadIdentityOptions(c, nil)
+}
+
+func loadIdentityOptions(c *server.Context, filters map[string]any) []map[string]any {
 	identityModel := frontrecord.Resolve("user.NewIdentityModel")
 	if identityModel == nil {
 		return []map[string]any{}
 	}
 
-	rows := identityModel.SelectMap(c.Context(), nil, map[string]any{
+	rows := identityModel.SelectMap(c.Context(), filters, map[string]any{
 		"field": "main.id, main.name, main.status, main.sort",
 		"order": "main.sort asc, main.id asc",
 	})
@@ -121,6 +130,58 @@ func (UserOptionService) ProviderLoadBenefitItems(c *server.Context, params []an
 		return []map[string]any{}
 	}
 	return (UserOptionService{}).ProviderLoadPointConfigs(c, nil)
+}
+
+func (UserOptionService) ProviderLoadBillingTypes(_ *server.Context, _ []any) any {
+	return []map[string]any{
+		{
+			"id":    billingBenefitTypeAbility,
+			"value": "能力",
+			"label": "能力",
+			"name":  "能力",
+			"leaf":  false,
+		},
+	}
+}
+
+func (UserOptionService) ProviderLoadBillingScopes(_ *server.Context, params []any) any {
+	if serviceOptionBillingType(params) != billingBenefitTypeAbility {
+		return []map[string]any{}
+	}
+	return []map[string]any{
+		{
+			"id":           usermodel.BillingScopeAll,
+			"value":        "全部能力",
+			"label":        "全部能力",
+			"name":         "全部能力",
+			"billing_type": billingBenefitTypeAbility,
+			"leaf":         true,
+		},
+		{
+			"id":           usermodel.BillingScopeSpecified,
+			"value":        "指定能力",
+			"label":        "指定能力",
+			"name":         "指定能力",
+			"billing_type": billingBenefitTypeAbility,
+			"leaf":         true,
+		},
+	}
+}
+
+func serviceOptionBillingType(params []any) string {
+	if len(params) == 0 {
+		return billingBenefitTypeAbility
+	}
+	payload, ok := params[0].(map[string]any)
+	if !ok {
+		return billingBenefitTypeAbility
+	}
+	for _, key := range []string{"billing_type", "parent_id", "parentId", "id", "value"} {
+		if value := strings.TrimSpace(util.ToString(payload[key])); value != "" && value != "0" {
+			return value
+		}
+	}
+	return billingBenefitTypeAbility
 }
 
 func serviceOptionBenefitType(params []any) string {
@@ -241,6 +302,7 @@ func (UserHook) ProviderBeforeSaveIdentityLevel(c *server.Context, params []any)
 	payload := clonePointPayload(params)
 	if isUserPartialRecord(payload) {
 		normalizePresentIdentitySortAndStatus(payload)
+		validatePartialRegistrationLevel(c, payload)
 		return payload
 	}
 
@@ -309,6 +371,7 @@ func (UserHook) ProviderBeforeSaveIdentityLevel(c *server.Context, params []any)
 	}
 
 	normalizePresentIdentitySortAndStatus(payload)
+	validateRegistrationLevel(c.Context(), levelID, identityID, upgradeMethod, normalizeUserStatus(payload["status"]))
 	return payload
 }
 
@@ -392,51 +455,177 @@ func (UserHook) ProviderBeforeSaveUserIdentity(c *server.Context, params []any) 
 
 func (UserIdentityService) ProviderCreate(c *server.Context, params []any) any {
 	payload := normalizeUserIdentityPayload(c, clonePointPayload(params), true)
-	userIdentityModel := usermodel.NewUserIdentityModel()
-	logModel := usermodel.NewUserIdentityLogModel()
 	now := time.Now()
-	var cardNo string
-	var startedAt time.Time
-	var expiredAt time.Time
-	var userIdentityID uint64
+	var saved userIdentitySaveResult
 
 	err := orm.Transaction(c.Context(), func(txCtx context.Context) error {
-		existingRow := userIdentityModel.FindMap(txCtx, map[string]any{
-			"user_id":     payload.userID,
-			"identity_id": payload.identityID,
-		})
-		cardNo = userIdentityCardNo(txCtx, userIdentityModel, logModel, existingRow, now)
-		startedAt, expiredAt = userIdentityPeriod(now, payload.levelRow, existingRow)
-
-		record := payload.userIdentityRecord(cardNo, expiredAt)
-		if len(existingRow) > 0 {
-			userIdentityID = util.ToUint64(existingRow["id"])
-			userIdentityModel.Update(txCtx, map[string]any{"id": userIdentityID}, record, false)
-		} else {
-			userIdentityID = util.ToUint64(userIdentityModel.Insert(txCtx, record))
-		}
-		if userIdentityID == 0 {
-			return frontaction.NewFieldError("form.identity_id", "用户身份保存失败。")
-		}
-
-		logRecord := payload.userIdentityLogRecord(userIdentityID, cardNo, startedAt, expiredAt)
-		logModel.Insert(txCtx, logRecord)
-		return nil
+		var saveErr error
+		saved, saveErr = saveUserIdentity(txCtx, payload, now)
+		return saveErr
 	})
 	if err != nil {
-		panic(err)
+		panic(frontaction.NewFieldError("form.identity_id", err.Error()))
 	}
 
 	return map[string]any{
-		"id":          userIdentityID,
+		"id":          saved.id,
 		"_virtual":    true,
 		"user_id":     payload.userID,
 		"status":      payload.status,
-		"card_no":     cardNo,
-		"expired_at":  expiredAt,
+		"card_no":     saved.cardNo,
+		"expired_at":  saved.expiredAt,
 		"identity_id": payload.identityID,
 		"level_id":    payload.levelID,
 		"remark":      payload.remark,
+	}
+}
+
+type userIdentitySaveResult struct {
+	id        uint64
+	cardNo    string
+	expiredAt time.Time
+}
+
+func saveUserIdentity(ctx context.Context, payload userIdentityPayload, now time.Time) (userIdentitySaveResult, error) {
+	userIdentityModel := usermodel.NewUserIdentityModel()
+	logModel := usermodel.NewUserIdentityLogModel()
+	existingRow := userIdentityModel.FindMap(ctx, map[string]any{
+		"user_id":     payload.userID,
+		"identity_id": payload.identityID,
+	})
+	cardNo := userIdentityCardNo(ctx, userIdentityModel, logModel, existingRow, now)
+	startedAt, expiredAt := userIdentityPeriod(now, payload.levelRow, existingRow)
+	record := payload.userIdentityRecord(cardNo, expiredAt)
+
+	userIdentityID := util.ToUint64(existingRow["id"])
+	if userIdentityID > 0 {
+		userIdentityModel.Update(ctx, map[string]any{"id": userIdentityID}, record, false)
+	} else {
+		userIdentityID = util.ToUint64(userIdentityModel.Insert(ctx, record))
+	}
+	if userIdentityID == 0 {
+		return userIdentitySaveResult{}, fmt.Errorf("用户身份保存失败")
+	}
+
+	logRecord := payload.userIdentityLogRecord(userIdentityID, cardNo, startedAt, expiredAt)
+	if util.ToUint64(logModel.Insert(ctx, logRecord)) == 0 {
+		return userIdentitySaveResult{}, fmt.Errorf("用户身份日志保存失败")
+	}
+	return userIdentitySaveResult{
+		id:        userIdentityID,
+		cardNo:    cardNo,
+		expiredAt: expiredAt,
+	}, nil
+}
+
+func grantRegistrationIdentities(ctx context.Context, userID uint64, userRow map[string]any, now time.Time) error {
+	levels := usermodel.NewIdentityLevelModel().SelectMap(ctx, map[string]any{
+		"upgrade_method": levelUpgradeRegister,
+		"status":         identityStatusEnabled,
+	}, map[string]any{"order": "identity_id asc,sort asc,level asc,id asc"})
+	if len(levels) == 0 {
+		return nil
+	}
+
+	identityIDs := make([]any, 0, len(levels))
+	seenIdentityIDs := make(map[uint64]bool, len(levels))
+	for _, levelRow := range levels {
+		identityID := util.ToUint64(levelRow["identity_id"])
+		if identityID > 0 && !seenIdentityIDs[identityID] {
+			identityIDs = append(identityIDs, identityID)
+			seenIdentityIDs[identityID] = true
+		}
+	}
+	if len(identityIDs) == 0 {
+		return nil
+	}
+	identities := usermodel.NewIdentityModel().SelectMap(ctx, map[string]any{
+		"id":     identityIDs,
+		"status": identityStatusEnabled,
+	})
+	identityByID := make(map[uint64]map[string]any, len(identities))
+	for _, identityRow := range identities {
+		identityByID[util.ToUint64(identityRow["id"])] = identityRow
+	}
+
+	granted := make(map[uint64]bool, len(identityByID))
+	existingRows := usermodel.NewUserIdentityModel().SelectMap(ctx, map[string]any{
+		"user_id":     userID,
+		"identity_id": identityIDs,
+	}, map[string]any{"field": "main.identity_id"})
+	for _, row := range existingRows {
+		if identityID := util.ToUint64(row["identity_id"]); identityID > 0 {
+			granted[identityID] = true
+		}
+	}
+	for _, levelRow := range levels {
+		identityID := util.ToUint64(levelRow["identity_id"])
+		identityRow := identityByID[identityID]
+		if identityID == 0 || granted[identityID] || len(identityRow) == 0 {
+			continue
+		}
+		payload := userIdentityPayload{
+			userID:      userID,
+			userRow:     userRow,
+			identityID:  identityID,
+			identityRow: identityRow,
+			levelID:     util.ToUint64(levelRow["id"]),
+			levelRow:    levelRow,
+			status:      identityStatusEnabled,
+			remark:      "注册自动授予",
+		}
+		if _, err := saveUserIdentity(ctx, payload, now); err != nil {
+			return err
+		}
+		granted[identityID] = true
+	}
+	return nil
+}
+
+func validatePartialRegistrationLevel(c *server.Context, payload map[string]any) {
+	levelID := util.ToUint64(payload["id"])
+	if levelID == 0 {
+		return
+	}
+	levelRow := usermodel.NewIdentityLevelModel().FindMap(c.Context(), map[string]any{"id": levelID})
+	if len(levelRow) == 0 {
+		return
+	}
+	identityID := util.ToUint64(levelRow["identity_id"])
+	if value, ok := payload["identity_id"]; ok {
+		identityID = util.ToUint64(value)
+	}
+	upgradeMethod := util.ToIntDefault(levelRow["upgrade_method"], 0)
+	if value, ok := payload["upgrade_method"]; ok {
+		upgradeMethod = util.ToIntDefault(value, 0)
+	}
+	status := normalizeUserStatus(levelRow["status"])
+	if value, ok := payload["status"]; ok {
+		status = normalizeUserStatus(value)
+	}
+	validateRegistrationLevel(
+		c.Context(),
+		levelID,
+		identityID,
+		upgradeMethod,
+		status,
+	)
+}
+
+func validateRegistrationLevel(ctx context.Context, levelID uint64, identityID uint64, upgradeMethod int, status int16) {
+	if identityID == 0 || upgradeMethod != levelUpgradeRegister || status != identityStatusEnabled {
+		return
+	}
+	filters := map[string]any{
+		"identity_id":    identityID,
+		"upgrade_method": levelUpgradeRegister,
+		"status":         identityStatusEnabled,
+	}
+	if levelID > 0 {
+		filters["id"] = map[string]any{"neq": levelID}
+	}
+	if usermodel.NewIdentityLevelModel().Count(ctx, filters) > 0 {
+		panic(frontaction.NewFieldError("form.upgrade_method", "同一身份只能启用一个注册自动授予等级。"))
 	}
 }
 

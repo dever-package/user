@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/shemic/dever/orm"
 	"github.com/shemic/dever/util"
 
 	usermodel "github.com/dever-package/user/model"
@@ -18,6 +20,7 @@ type identityBenefitIssueStats struct {
 	SkippedCount  int `json:"skipped_count"`
 	ClearedCount  int `json:"cleared_count"`
 	ClearedAmount int `json:"cleared_amount"`
+	ErrorCount    int `json:"error_count"`
 }
 
 type identityBenefitCycle struct {
@@ -34,6 +37,11 @@ func (BenefitService) IssueDueIdentityBenefits(ctx context.Context, now time.Tim
 	}
 
 	stats := identityBenefitIssueStats{}
+	var resultErr error
+	if err := backfillRegistrationIdentities(ctx, now); err != nil {
+		stats.ErrorCount++
+		resultErr = errors.Join(resultErr, err)
+	}
 	benefitRows := usermodel.NewIdentityBenefitModel().SelectMap(ctx, map[string]any{
 		"benefit_type": benefitTypeRewardPoint,
 		"status":       identityStatusEnabled,
@@ -46,25 +54,52 @@ func (BenefitService) IssueDueIdentityBenefits(ctx context.Context, now time.Tim
 			continue
 		}
 		stats.BenefitCount++
-		userIdentityRows := activeUserIdentityRowsForBenefit(ctx, benefitRow, now)
-		for _, userIdentityRow := range userIdentityRows {
-			stats.UserCount++
-			result, err := issueIdentityBenefitToUser(ctx, benefitRow, userIdentityRow, now)
-			if err != nil {
-				return stats.toMap(now, err), err
+		for page := 1; ; page++ {
+			userIdentityRows := activeUserIdentityRowsForBenefit(ctx, benefitRow, now, 0, page, 200)
+			for _, userIdentityRow := range userIdentityRows {
+				stats.UserCount++
+				result, err := issueIdentityBenefitToUser(ctx, benefitRow, userIdentityRow, now)
+				if err != nil {
+					stats.ErrorCount++
+					resultErr = errors.Join(resultErr, fmt.Errorf("用户身份 %d 发放权益 %d 失败: %w",
+						util.ToUint64(userIdentityRow["id"]), util.ToUint64(benefitRow["id"]), err))
+					continue
+				}
+				if result.issued {
+					stats.IssuedCount++
+				} else {
+					stats.SkippedCount++
+				}
+				if result.clearedAmount > 0 {
+					stats.ClearedCount++
+					stats.ClearedAmount += result.clearedAmount
+				}
 			}
-			if result.issued {
-				stats.IssuedCount++
-			} else {
-				stats.SkippedCount++
-			}
-			if result.clearedAmount > 0 {
-				stats.ClearedCount++
-				stats.ClearedAmount += result.clearedAmount
+			if len(userIdentityRows) < 200 {
+				break
 			}
 		}
 	}
-	return stats.toMap(now, nil), nil
+	return stats.toMap(now, resultErr), resultErr
+}
+
+func issueDueIdentityBenefitsForUser(ctx context.Context, userID uint64, now time.Time) error {
+	benefitRows := usermodel.NewIdentityBenefitModel().SelectMap(ctx, map[string]any{
+		"benefit_type": benefitTypeRewardPoint,
+		"status":       identityStatusEnabled,
+	}, map[string]any{"order": "identity_id asc,level asc,sort asc,id asc"})
+	for _, benefitRow := range benefitRows {
+		if !isRunnableIdentityBenefit(benefitRow) {
+			continue
+		}
+		rows := activeUserIdentityRowsForBenefit(ctx, benefitRow, now, userID, 1, 100)
+		for _, row := range rows {
+			if _, err := issueIdentityBenefitToUser(ctx, benefitRow, row, now); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (stats identityBenefitIssueStats) toMap(now time.Time, runErr error) map[string]any {
@@ -75,6 +110,7 @@ func (stats identityBenefitIssueStats) toMap(now time.Time, runErr error) map[st
 		"skipped_count":  stats.SkippedCount,
 		"cleared_count":  stats.ClearedCount,
 		"cleared_amount": stats.ClearedAmount,
+		"error_count":    stats.ErrorCount,
 		"run_at":         now.Format(time.RFC3339),
 	}
 	if runErr != nil {
@@ -89,35 +125,38 @@ type identityBenefitIssueResult struct {
 }
 
 func issueIdentityBenefitToUser(ctx context.Context, benefitRow map[string]any, userIdentityRow map[string]any, now time.Time) (identityBenefitIssueResult, error) {
-	cycle, ok := currentIdentityBenefitCycle(benefitRow, userIdentityRow, now)
-	if !ok {
-		return identityBenefitIssueResult{}, nil
-	}
-
-	grantRows := currentCycleGrantRows(ctx, userIdentityRow, benefitRow, cycle.startAt)
-	limitTimes := normalizeBenefitPositiveInt(benefitRow["limit_times"], 1)
-	if len(grantRows) >= limitTimes {
-		return identityBenefitIssueResult{}, nil
-	}
-
-	clearedAmount := 0
-	grantNo := len(grantRows) + 1
-	if grantNo == 1 && normalizeBenefitClearPrevious(benefitRow["clear_previous"]) == benefitClearEnabled {
-		amount, err := clearPreviousIdentityBenefitGrants(ctx, userIdentityRow, benefitRow, cycle.startAt, now)
-		if err != nil {
-			return identityBenefitIssueResult{}, err
+	result := identityBenefitIssueResult{}
+	err := orm.Transaction(ctx, func(txCtx context.Context) error {
+		cycle, ok := currentIdentityBenefitCycle(benefitRow, userIdentityRow, now)
+		if !ok {
+			return nil
 		}
-		clearedAmount = amount
-	}
-
-	err := createIdentityBenefitGrant(ctx, benefitRow, userIdentityRow, cycle, grantNo, now)
+		grantRows := currentCycleGrantRows(txCtx, userIdentityRow, benefitRow, cycle.startAt)
+		limitTimes := normalizeBenefitPositiveInt(benefitRow["limit_times"], 1)
+		if len(grantRows) >= limitTimes {
+			return nil
+		}
+		grantNo := len(grantRows) + 1
+		if grantNo == 1 && normalizeBenefitClearPrevious(benefitRow["clear_previous"]) == benefitClearEnabled {
+			amount, err := clearPreviousIdentityBenefitGrants(txCtx, userIdentityRow, benefitRow, cycle.startAt, now)
+			if err != nil {
+				return err
+			}
+			result.clearedAmount = amount
+		}
+		if err := createIdentityBenefitGrant(txCtx, benefitRow, userIdentityRow, cycle, grantNo, now); err != nil {
+			return err
+		}
+		result.issued = true
+		return nil
+	})
 	if err != nil {
 		if isUniqueConflictError(err) {
-			return identityBenefitIssueResult{clearedAmount: clearedAmount}, nil
+			return identityBenefitIssueResult{}, nil
 		}
 		return identityBenefitIssueResult{}, err
 	}
-	return identityBenefitIssueResult{issued: true, clearedAmount: clearedAmount}, nil
+	return result, nil
 }
 
 func isRunnableIdentityBenefit(row map[string]any) bool {
@@ -128,27 +167,25 @@ func isRunnableIdentityBenefit(row map[string]any) bool {
 		normalizeBenefitType(row["benefit_type"]) == benefitTypeRewardPoint &&
 		normalizeUserStatus(row["status"]) == identityStatusEnabled &&
 		util.ToIntDefault(row["point_amount"], 0) > 0 &&
-		normalizeBenefitPositiveInt(row["cycle_days"], 1) > 0 &&
-		normalizeBenefitPositiveInt(row["limit_times"], 1) > 0
+		util.ToIntDefault(row["point_amount"], 0) <= maxPointChangeAmount &&
+		normalizeBenefitPositiveInt(row["cycle_days"], 1) <= maxBenefitCycleDays &&
+		normalizeBenefitPositiveInt(row["limit_times"], 1) <= maxBenefitLimitTimes
 }
 
-func activeUserIdentityRowsForBenefit(ctx context.Context, benefitRow map[string]any, now time.Time) []map[string]any {
-	rows := usermodel.NewUserIdentityModel().SelectMap(ctx, map[string]any{
+func activeUserIdentityRowsForBenefit(ctx context.Context, benefitRow map[string]any, now time.Time, userID uint64, page int, pageSize int) []map[string]any {
+	filters := map[string]any{
 		"identity_id": util.ToUint64(benefitRow["identity_id"]),
 		"level_id":    util.ToUint64(benefitRow["level_id"]),
 		"status":      identityStatusEnabled,
-	}, map[string]any{
-		"order": "user_id asc,id asc",
-	})
-	result := make([]map[string]any, 0, len(rows))
-	for _, row := range rows {
-		expiredAt := normalizeUserIdentityTime(row["expired_at"])
-		if expiredAt.IsZero() || !expiredAt.After(now) {
-			continue
-		}
-		result = append(result, row)
+		"expires_at":  map[string]any{"gt": now},
 	}
-	return result
+	if userID > 0 {
+		filters["user_id"] = userID
+	}
+	return usermodel.NewUserIdentityModel().SelectMap(ctx, filters, map[string]any{
+		"order": "user_id asc,id asc",
+		"page":  page, "pageSize": pageSize,
+	})
 }
 
 func currentIdentityBenefitCycle(benefitRow map[string]any, userIdentityRow map[string]any, now time.Time) (identityBenefitCycle, bool) {
@@ -191,24 +228,13 @@ func laterTime(left time.Time, right time.Time) time.Time {
 }
 
 func currentCycleGrantRows(ctx context.Context, userIdentityRow map[string]any, benefitRow map[string]any, cycleStartAt time.Time) []map[string]any {
-	rows := usermodel.NewUserBenefitGrantModel().SelectMap(ctx, map[string]any{
+	return usermodel.NewUserBenefitGrantModel().SelectMap(ctx, map[string]any{
 		"user_identity_id":    util.ToUint64(userIdentityRow["id"]),
 		"identity_benefit_id": util.ToUint64(benefitRow["id"]),
+		"cycle_start_at":      cycleStartAt,
 	}, map[string]any{
 		"order": "grant_no asc,id asc",
 	})
-	result := make([]map[string]any, 0, len(rows))
-	for _, row := range rows {
-		if sameBenefitCycleStart(row["cycle_start_at"], cycleStartAt) {
-			result = append(result, row)
-		}
-	}
-	return result
-}
-
-func sameBenefitCycleStart(value any, expected time.Time) bool {
-	current := normalizeUserIdentityTime(value)
-	return !current.IsZero() && current.Equal(expected)
 }
 
 func clearPreviousIdentityBenefitGrants(ctx context.Context, userIdentityRow map[string]any, benefitRow map[string]any, currentCycleStartAt time.Time, now time.Time) (int, error) {

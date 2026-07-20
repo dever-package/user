@@ -108,7 +108,13 @@
               "value": "periodic_benefits",
               "name": "周期权益",
               "type": "show-base",
-              "className": "min-w-[360px] whitespace-normal break-words text-center"
+              "className": "min-w-[280px] whitespace-normal break-words text-center"
+            },
+            {
+              "value": "billing_benefits",
+              "name": "计费权益",
+              "type": "show-base",
+              "className": "min-w-[280px] whitespace-normal break-words text-center"
             },
             {
               "name": "操作",
@@ -153,7 +159,7 @@
           "stateKey": "dialog.editBenefit",
           "pageRoute": "/user/identity_benefit/update",
           "title": "修改身份权益",
-          "description": "当前只配置周期权益里的奖励积分。",
+          "description": "配置周期发放权益和能力调用计费规则。",
           "footer": {
             "confirm": true,
             "confirmText": "保存"
@@ -176,7 +182,7 @@
   "data": {
     "page": {
       "title": "身份权益",
-      "description": "按身份和等级配置周期权益，目前仅支持奖励积分。"
+      "description": "按身份和等级配置周期发放权益与能力调用计费规则。"
     },
     "search": {
       "keyword": "",

@@ -77,9 +77,7 @@
     "form": {
       "id": "",
       "name": "",
-      "purchase_point_id": 1,
-      "sort": 100,
-      "status": 1
+      "purchase_point_id": 1
     }
   },
   "state": {},

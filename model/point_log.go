@@ -16,6 +16,8 @@ type PointLog struct {
 	PointName           string    `dorm:"type:varchar(64);not null;default:'';comment:积分名称"`
 	PointSymbol         string    `dorm:"type:varchar(32);not null;default:'';comment:积分符号"`
 	PointSymbolPosition int16     `dorm:"type:smallint;not null;default:2;comment:符号位置"`
+	PointHoldID         uint64    `dorm:"type:bigint;not null;default:0;comment:积分预占"`
+	BusinessKey         string    `dorm:"type:varchar(128);not null;default:'';comment:业务幂等键"`
 	ChangeType          string    `dorm:"type:varchar(32);not null;comment:变动类型"`
 	Source              string    `dorm:"type:varchar(32);not null;default:'admin';comment:来源"`
 	Amount              int       `dorm:"type:int;not null;comment:变动积分"`
@@ -33,6 +35,8 @@ type PointLogIndex struct {
 	UserMobile           struct{} `index:"user_mobile,created_at,id"`
 	ChangeType           struct{} `index:"change_type,created_at,id"`
 	Source               struct{} `index:"source,created_at,id"`
+	PointHoldCreatedAt   struct{} `index:"point_hold_id,created_at,id"`
+	BusinessCreatedAt    struct{} `index:"business_key,created_at,id"`
 	CreatedAt            struct{} `index:"created_at"`
 }
 
@@ -57,6 +61,13 @@ var pointLogConfigRelation = orm.Relation{
 	OptionKeys: []string{"name", "symbol", "symbol_position"},
 }
 
+var pointLogHoldRelation = orm.Relation{
+	Field:      "point_hold_id",
+	Name:       "point_hold",
+	Option:     "user.NewPointHoldModel",
+	OptionKeys: []string{"business_key", "reserved_amount", "settled_amount", "status"},
+}
+
 func NewPointLogModel() *orm.Model[PointLog] {
 	return orm.LoadModel[PointLog]("积分日志", "user_point_log", orm.ModelConfig{
 		Index:    PointLogIndex{},
@@ -70,6 +81,7 @@ func NewPointLogModel() *orm.Model[PointLog] {
 			pointLogUserPointRelation,
 			pointLogUserRelation,
 			pointLogConfigRelation,
+			pointLogHoldRelation,
 		},
 	})
 }

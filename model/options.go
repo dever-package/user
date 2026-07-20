@@ -33,6 +33,14 @@ var pointSourceOptions = []map[string]any{
 	{"id": "admin", "value": "后台调整", "label": "后台调整", "color": "#2563eb"},
 	{"id": "system", "value": "系统变动", "label": "系统变动", "color": "#737373"},
 	{"id": "cron", "value": "计划任务", "label": "计划任务", "color": "#7c3aed"},
+	{"id": "billing", "value": "能力计费", "label": "能力计费", "color": "#dc2626"},
+}
+
+var pointHoldStatusOptions = []map[string]any{
+	{"id": 1, "value": "预占中", "label": "预占中", "color": "#ea580c"},
+	{"id": 2, "value": "已结算", "label": "已结算", "color": "#0f766e"},
+	{"id": 3, "value": "已释放", "label": "已释放", "color": "#737373"},
+	{"id": 4, "value": "已过期", "label": "已过期", "color": "#737373"},
 }
 
 var benefitTypeOptions = []map[string]any{

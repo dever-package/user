@@ -109,6 +109,7 @@
         "account": "$form.account",
         "name": "$form.name",
         "mobile": "$form.mobile",
+        "status": "$form.status",
         "remark": "$form.remark"
       },
       "before": {
