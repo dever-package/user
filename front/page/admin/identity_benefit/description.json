@@ -1,0 +1,74 @@
+{
+  "page": {
+    "name": "权益描述",
+    "parent": "user/identity_benefit/list",
+    "type": 2
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-icon",
+        "name": "图标",
+        "placeholder": "请选择图标",
+        "value": "form.icon",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请选择权益图标。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-input",
+        "name": "文案",
+        "placeholder": "例如：每日赠送 100 金币",
+        "value": "form.content",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "权益文案不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": 0,
+      "level_id": 0,
+      "icon": "circle-check",
+      "content": "",
+      "sort": 100
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form"
+    }
+  }
+}

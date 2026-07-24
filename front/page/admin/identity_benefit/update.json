@@ -56,6 +56,21 @@
         "meta": {
           "formLayout": "horizontal"
         }
+      },
+      {
+        "type": "form-array",
+        "name": "权益描述",
+        "value": "form.benefit_descriptions",
+        "mode": "form",
+        "info": "用于订阅卡片展示。配置后将覆盖周期发放和计费系数等技术说明；未配置时继续使用系统自动说明。",
+        "meta": {
+          "pageRoute": "/user/identity_benefit/description",
+          "addText": "添加权益描述",
+          "itemName": "权益描述",
+          "emptyText": "暂无自定义权益描述，前台将展示系统自动说明。",
+          "drag": "sort",
+          "formLayout": "horizontal"
+        }
       }
     ]
   },
@@ -65,12 +80,14 @@
       "identity_id": "",
       "name": "",
       "level": 0,
+      "benefit_descriptions": [],
       "periodic_benefits": [],
       "billing_benefits": [],
       "_fields": [
         "identity_id",
         "name",
         "level",
+        "benefit_descriptions",
         "periodic_benefits",
         "billing_benefits"
       ],
@@ -92,6 +109,7 @@
         "level_name": "$form.name",
         "level": "$form.level",
         "_virtual": true,
+        "benefit_descriptions": "$form.benefit_descriptions",
         "periodic_benefits": "$form.periodic_benefits",
         "billing_benefits": "$form.billing_benefits"
       },

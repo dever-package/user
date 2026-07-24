@@ -7,6 +7,7 @@ var userStatusOptions = []map[string]any{
 
 var credentialProviderOptions = []map[string]any{
 	{"id": "password", "value": "密码登录", "label": "密码登录", "color": "#2563eb"},
+	{"id": "feishu", "value": "飞书登录", "label": "飞书登录", "color": "#0f766e"},
 }
 
 var credentialStatusOptions = []map[string]any{
@@ -34,6 +35,7 @@ var pointSourceOptions = []map[string]any{
 	{"id": "system", "value": "系统变动", "label": "系统变动", "color": "#737373"},
 	{"id": "cron", "value": "计划任务", "label": "计划任务", "color": "#7c3aed"},
 	{"id": "billing", "value": "能力计费", "label": "能力计费", "color": "#dc2626"},
+	{"id": "purchase", "value": "用户购买", "label": "用户购买", "color": "#0f766e"},
 }
 
 var pointHoldStatusOptions = []map[string]any{

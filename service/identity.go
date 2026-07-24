@@ -335,6 +335,7 @@ func (UserHook) ProviderBeforeSaveIdentityLevel(c *server.Context, params []any)
 		panic(frontaction.NewFieldError("form.level", "等级数字必须大于 0。"))
 	}
 	payload["level"] = level
+	validateUniqueIdentityLevel(c.Context(), levelID, identityID, level)
 
 	durationDays := util.ToIntDefault(payload["duration_days"], 0)
 	if durationDays <= 0 {
@@ -501,6 +502,7 @@ func saveUserIdentity(ctx context.Context, payload userIdentityPayload, now time
 	if userIdentityID > 0 {
 		userIdentityModel.Update(ctx, map[string]any{"id": userIdentityID}, record, false)
 	} else {
+		record["created_at"] = now
 		userIdentityID = util.ToUint64(userIdentityModel.Insert(ctx, record))
 	}
 	if userIdentityID == 0 {
@@ -518,7 +520,14 @@ func saveUserIdentity(ctx context.Context, payload userIdentityPayload, now time
 	}, nil
 }
 
-func grantRegistrationIdentities(ctx context.Context, userID uint64, userRow map[string]any, now time.Time) error {
+type registrationIdentityGrant struct {
+	identityID  uint64
+	identityRow map[string]any
+	levelID     uint64
+	levelRow    map[string]any
+}
+
+func loadRegistrationIdentityGrants(ctx context.Context) []registrationIdentityGrant {
 	levels := usermodel.NewIdentityLevelModel().SelectMap(ctx, map[string]any{
 		"upgrade_method": levelUpgradeRegister,
 		"status":         identityStatusEnabled,
@@ -548,38 +557,94 @@ func grantRegistrationIdentities(ctx context.Context, userID uint64, userRow map
 		identityByID[util.ToUint64(identityRow["id"])] = identityRow
 	}
 
-	granted := make(map[uint64]bool, len(identityByID))
-	existingRows := usermodel.NewUserIdentityModel().SelectMap(ctx, map[string]any{
-		"user_id":     userID,
-		"identity_id": identityIDs,
-	}, map[string]any{"field": "main.identity_id"})
-	for _, row := range existingRows {
-		if identityID := util.ToUint64(row["identity_id"]); identityID > 0 {
-			granted[identityID] = true
-		}
-	}
+	result := make([]registrationIdentityGrant, 0, len(identityByID))
+	configured := make(map[uint64]bool, len(identityByID))
 	for _, levelRow := range levels {
 		identityID := util.ToUint64(levelRow["identity_id"])
 		identityRow := identityByID[identityID]
-		if identityID == 0 || granted[identityID] || len(identityRow) == 0 {
+		if identityID == 0 || configured[identityID] || len(identityRow) == 0 {
+			continue
+		}
+		result = append(result, registrationIdentityGrant{
+			identityID: identityID, identityRow: identityRow,
+			levelID: util.ToUint64(levelRow["id"]), levelRow: levelRow,
+		})
+		configured[identityID] = true
+	}
+	return result
+}
+
+func grantRegistrationIdentitiesWithConfig(ctx context.Context, userID uint64, userRow map[string]any, now time.Time, grants []registrationIdentityGrant, existing map[uint64]bool, onGranted func(map[string]any) error) error {
+	if existing == nil {
+		existing = map[uint64]bool{}
+	}
+	for _, grant := range grants {
+		if grant.identityID == 0 || existing[grant.identityID] {
 			continue
 		}
 		payload := userIdentityPayload{
 			userID:      userID,
 			userRow:     userRow,
-			identityID:  identityID,
-			identityRow: identityRow,
-			levelID:     util.ToUint64(levelRow["id"]),
-			levelRow:    levelRow,
+			identityID:  grant.identityID,
+			identityRow: grant.identityRow,
+			levelID:     grant.levelID,
+			levelRow:    grant.levelRow,
 			status:      identityStatusEnabled,
 			remark:      "注册自动授予",
 		}
-		if _, err := saveUserIdentity(ctx, payload, now); err != nil {
+		saved, err := saveUserIdentity(ctx, payload, now)
+		if err != nil {
 			return err
 		}
-		granted[identityID] = true
+		existing[grant.identityID] = true
+		if onGranted != nil {
+			row := payload.userIdentityRecord(saved.cardNo, saved.expiredAt)
+			row["id"] = saved.id
+			row["created_at"] = now
+			if err := onGranted(row); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
+}
+
+func registrationGrantIdentityIDs(grants []registrationIdentityGrant) []any {
+	ids := make([]any, 0, len(grants))
+	for _, grant := range grants {
+		if grant.identityID > 0 {
+			ids = append(ids, grant.identityID)
+		}
+	}
+	return ids
+}
+
+func registrationIdentitySet(ctx context.Context, userIDs []uint64, identityIDs []any) map[uint64]map[uint64]bool {
+	result := make(map[uint64]map[uint64]bool, len(userIDs))
+	if len(userIDs) == 0 || len(identityIDs) == 0 {
+		return result
+	}
+	filterUserIDs := make([]any, 0, len(userIDs))
+	for _, userID := range userIDs {
+		if userID > 0 {
+			filterUserIDs = append(filterUserIDs, userID)
+		}
+	}
+	rows := usermodel.NewUserIdentityModel().SelectMap(ctx, map[string]any{
+		"user_id": filterUserIDs, "identity_id": identityIDs,
+	}, map[string]any{"field": "main.user_id,main.identity_id"})
+	for _, row := range rows {
+		userID := util.ToUint64(row["user_id"])
+		identityID := util.ToUint64(row["identity_id"])
+		if userID == 0 || identityID == 0 {
+			continue
+		}
+		if result[userID] == nil {
+			result[userID] = map[uint64]bool{}
+		}
+		result[userID][identityID] = true
+	}
+	return result
 }
 
 func validatePartialRegistrationLevel(c *server.Context, payload map[string]any) {
@@ -626,6 +691,19 @@ func validateRegistrationLevel(ctx context.Context, levelID uint64, identityID u
 	}
 	if usermodel.NewIdentityLevelModel().Count(ctx, filters) > 0 {
 		panic(frontaction.NewFieldError("form.upgrade_method", "同一身份只能启用一个注册自动授予等级。"))
+	}
+}
+
+func validateUniqueIdentityLevel(ctx context.Context, levelID uint64, identityID uint64, level int) {
+	filters := map[string]any{
+		"identity_id": identityID,
+		"level":       level,
+	}
+	if levelID > 0 {
+		filters["id"] = map[string]any{"neq": levelID}
+	}
+	if usermodel.NewIdentityLevelModel().Count(ctx, filters) > 0 {
+		panic(frontaction.NewFieldError("form.level", "同一身份下的等级数字不能重复，请填写其他数字。"))
 	}
 }
 

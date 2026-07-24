@@ -53,6 +53,7 @@ func (BenefitService) ProviderBeforeSaveIdentityBenefit(c *server.Context, param
 	payload["level_id"] = levelID
 	payload["level_name"] = strings.TrimSpace(util.ToString(levelRow["name"]))
 	payload["level"] = util.ToIntDefault(levelRow["level"], 0)
+	payload["benefit_descriptions"] = normalizeIdentityBenefitDescriptionRows(payload)
 	payload["periodic_benefits"] = normalizeIdentityBenefitRows(c.Context(), payload)
 	payload["billing_benefits"] = normalizeIdentityBillingBenefitRows(c.Context(), payload)
 	return payload
@@ -113,16 +114,23 @@ func (BenefitService) ProviderAttachIdentityBenefitSummary(c *server.Context, pa
 	}, map[string]any{
 		"order": "level_id asc,sort asc,id asc",
 	})
-	groupedBenefits := groupIdentityBenefitRows(benefitRows)
+	groupedBenefits := groupIdentityBenefitRowsByLevel(benefitRows)
 	billingRows := usermodel.NewIdentityBillingBenefitModel().SelectMap(c.Context(), map[string]any{
 		"level_id": levelIDs,
 	}, map[string]any{
 		"order": "level_id asc,sort asc,id asc",
 	})
-	groupedBilling := groupIdentityBillingBenefitRows(billingRows)
+	groupedBilling := groupIdentityBenefitRowsByLevel(billingRows)
+	descriptionRows := usermodel.NewIdentityBenefitDescriptionModel().SelectMap(c.Context(), map[string]any{
+		"level_id": levelIDs,
+	}, map[string]any{
+		"order": "level_id asc,sort asc,id asc",
+	})
+	groupedDescriptions := groupIdentityBenefitRowsByLevel(descriptionRows)
 	for _, row := range rows {
 		levelID := util.ToUint64(row["id"])
 		benefits := normalizeIdentityBenefitViewRows(groupedBenefits[levelID])
+		row["benefit_descriptions"] = formatIdentityBenefitDescriptionSummary(groupedDescriptions[levelID])
 		row["periodic_benefits"] = formatIdentityBenefitSummary(benefits)
 		row["billing_benefits"] = formatIdentityBillingBenefitSummary(groupedBilling[levelID])
 	}
@@ -191,6 +199,31 @@ func normalizeIdentityBenefitPartial(payload map[string]any) {
 	if _, ok := payload["status"]; ok {
 		payload["status"] = normalizeUserStatus(payload["status"])
 	}
+}
+
+func normalizeIdentityBenefitDescriptionRows(payload map[string]any) []any {
+	rows := normalizeBenefitChildRows(payload["benefit_descriptions"])
+	if len(rows) == 0 {
+		return []any{}
+	}
+
+	result := make([]any, 0, len(rows))
+	for index, row := range rows {
+		next := util.CloneMap(row)
+		icon := strings.TrimSpace(util.ToString(next["icon"]))
+		if icon == "" {
+			panic(frontaction.NewFieldError("form.benefit_descriptions", "请选择权益图标。"))
+		}
+		content := strings.TrimSpace(util.ToString(next["content"]))
+		if content == "" {
+			panic(frontaction.NewFieldError("form.benefit_descriptions", "权益文案不能为空。"))
+		}
+		next["icon"] = icon
+		next["content"] = content
+		next["sort"] = normalizeBenefitSort(next["sort"], index)
+		result = append(result, next)
+	}
+	return result
 }
 
 func normalizeIdentityBenefitRows(ctx context.Context, payload map[string]any) []any {
@@ -624,7 +657,7 @@ func normalizeBenefitClearPrevious(value any) int16 {
 	return benefitClearEnabled
 }
 
-func groupIdentityBenefitRows(rows []map[string]any) map[uint64][]map[string]any {
+func groupIdentityBenefitRowsByLevel(rows []map[string]any) map[uint64][]map[string]any {
 	grouped := map[uint64][]map[string]any{}
 	for _, row := range rows {
 		levelID := util.ToUint64(row["level_id"])
@@ -636,16 +669,22 @@ func groupIdentityBenefitRows(rows []map[string]any) map[uint64][]map[string]any
 	return grouped
 }
 
-func groupIdentityBillingBenefitRows(rows []map[string]any) map[uint64][]map[string]any {
-	grouped := map[uint64][]map[string]any{}
+func formatIdentityBenefitDescriptionSummary(rows []map[string]any) string {
+	if len(rows) == 0 {
+		return "无"
+	}
+	parts := make([]string, 0, len(rows))
 	for _, row := range rows {
-		levelID := util.ToUint64(row["level_id"])
-		if levelID == 0 {
+		content := strings.TrimSpace(util.ToString(row["content"]))
+		if content == "" {
 			continue
 		}
-		grouped[levelID] = append(grouped[levelID], row)
+		parts = append(parts, content)
 	}
-	return grouped
+	if len(parts) == 0 {
+		return "无"
+	}
+	return strings.Join(parts, "；")
 }
 
 func formatIdentityBillingBenefitSummary(rows []map[string]any) string {

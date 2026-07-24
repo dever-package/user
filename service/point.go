@@ -153,6 +153,7 @@ func adjustUserPointsByOperation(ctx context.Context, businessKey string, reques
 	if businessKey == "" || len(businessKey) > 128 {
 		return 0, frontaction.NewFieldError("form.operation_key", "积分调整操作键无效，请重新打开表单。")
 	}
+	request.businessKey = businessKey
 	request = normalizePointAdjustRequest(request)
 	for attempt := 0; attempt < pointAdjustmentMaxAttempts; attempt++ {
 		state, err := adjustUserPointsByOperationOnce(ctx, businessKey, request)
@@ -624,9 +625,10 @@ func consumeUserBenefitGrantRemaining(ctx context.Context, userID uint64, pointC
 	remainingToConsume := amount
 	grantModel := usermodel.NewUserBenefitGrantModel()
 	rows := grantModel.SelectMap(ctx, map[string]any{
-		"user_id":         userID,
-		"point_config_id": pointConfigID,
-		"status":          benefitGrantStatusActive,
+		"user_id":          userID,
+		"point_config_id":  pointConfigID,
+		"status":           benefitGrantStatusActive,
+		"remaining_amount": map[string]any{"gt": 0},
 	}, map[string]any{
 		"order": "cycle_start_at asc,created_at asc,id asc",
 	})

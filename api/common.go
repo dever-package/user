@@ -56,6 +56,16 @@ func bodyUint64(body map[string]any, keys ...string) uint64 {
 	return 0
 }
 
+func bodyOptionalUint64(body map[string]any, keys ...string) (uint64, bool) {
+	for _, key := range keys {
+		value, exists := body[key]
+		if exists {
+			return util.ToUint64(value), true
+		}
+	}
+	return 0, false
+}
+
 func bodyStringSlice(body map[string]any, keys ...string) []string {
 	for _, key := range keys {
 		switch value := body[key].(type) {

@@ -12,13 +12,15 @@ const (
 )
 
 type User struct {
-	ID        uint64    `dorm:"primaryKey;autoIncrement;comment:用户ID"`
-	Account   string    `dorm:"type:varchar(128);not null;default:'';comment:账号"`
-	Name      string    `dorm:"type:varchar(64);not null;comment:姓名"`
-	Mobile    string    `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
-	Status    int16     `dorm:"type:smallint;not null;default:1;comment:状态"`
-	Remark    string    `dorm:"type:text;not null;default:'';comment:备注"`
-	CreatedAt time.Time `dorm:"not null;default:CURRENT_TIMESTAMP;comment:创建时间"`
+	ID             uint64    `dorm:"primaryKey;autoIncrement;comment:用户ID"`
+	Account        string    `dorm:"type:varchar(128);not null;default:'';comment:账号"`
+	Name           string    `dorm:"type:varchar(64);not null;comment:姓名"`
+	Mobile         string    `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
+	AvatarFileID   uint64    `dorm:"type:bigint;not null;default:0;comment:头像文件"`
+	SessionVersion uint64    `dorm:"type:bigint;not null;default:1;comment:会话版本"`
+	Status         int16     `dorm:"type:smallint;not null;default:1;comment:状态"`
+	Remark         string    `dorm:"type:text;not null;default:'';comment:备注"`
+	CreatedAt      time.Time `dorm:"not null;default:CURRENT_TIMESTAMP;comment:创建时间"`
 }
 
 type UserIndex struct {

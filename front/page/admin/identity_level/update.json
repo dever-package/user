@@ -75,6 +75,7 @@
         "type": "form-number",
         "value": "form.level",
         "mode": "form",
+        "info": "同一身份下不能重复。例如月会员填 1，季度会员填 2。",
         "validate": [
           {
             "type": "required",

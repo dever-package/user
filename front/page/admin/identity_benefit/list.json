@@ -105,6 +105,12 @@
               "className": "text-center"
             },
             {
+              "value": "benefit_descriptions",
+              "name": "权益描述",
+              "type": "show-base",
+              "className": "min-w-[240px] whitespace-normal break-words text-center"
+            },
+            {
               "value": "periodic_benefits",
               "name": "周期权益",
               "type": "show-base",
@@ -159,7 +165,7 @@
           "stateKey": "dialog.editBenefit",
           "pageRoute": "/user/identity_benefit/update",
           "title": "修改身份权益",
-          "description": "配置周期发放权益和能力调用计费规则。",
+          "description": "配置前台权益描述、周期发放权益和能力调用计费规则。",
           "footer": {
             "confirm": true,
             "confirmText": "保存"
@@ -182,7 +188,7 @@
   "data": {
     "page": {
       "title": "身份权益",
-      "description": "按身份和等级配置周期发放权益与能力调用计费规则。"
+      "description": "按身份和等级配置前台权益描述、周期发放权益与能力调用计费规则。"
     },
     "search": {
       "keyword": "",

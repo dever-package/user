@@ -22,28 +22,44 @@ func initializeRegistrationBenefits(ctx context.Context, userID uint64, userRow 
 		now = time.Now()
 	}
 	return orm.Transaction(ctx, func(txCtx context.Context) error {
-		if err := grantRegistrationIdentities(txCtx, userID, userRow, now); err != nil {
-			return err
+		grants := loadRegistrationIdentityGrants(txCtx)
+		if len(grants) == 0 {
+			return nil
 		}
-		return issueDueIdentityBenefitsForUser(txCtx, userID, now)
+		existing := registrationIdentitySet(txCtx, []uint64{userID}, registrationGrantIdentityIDs(grants))[userID]
+		return grantRegistrationIdentitiesWithConfig(txCtx, userID, userRow, now, grants, existing, func(userIdentityRow map[string]any) error {
+			return issueDueIdentityBenefitForUserIdentity(txCtx, userIdentityRow, now)
+		})
 	})
 }
 
 func backfillRegistrationIdentities(ctx context.Context, now time.Time) error {
 	var resultErr error
+	grants := loadRegistrationIdentityGrants(ctx)
+	if len(grants) == 0 {
+		return nil
+	}
+	identityIDs := registrationGrantIdentityIDs(grants)
 	for page := 1; ; page++ {
 		rows := usermodel.NewUserModel().SelectMap(ctx, map[string]any{
 			"status": usermodel.UserStatusEnabled,
 		}, map[string]any{
 			"order": "id asc", "page": page, "pageSize": registrationBackfillPageSize,
 		})
+		userIDs := make([]uint64, 0, len(rows))
+		for _, row := range rows {
+			if userID := util.ToUint64(row["id"]); userID > 0 {
+				userIDs = append(userIDs, userID)
+			}
+		}
+		existingByUser := registrationIdentitySet(ctx, userIDs, identityIDs)
 		for _, row := range rows {
 			userID := util.ToUint64(row["id"])
 			if userID == 0 {
 				continue
 			}
 			if err := orm.Transaction(ctx, func(txCtx context.Context) error {
-				return grantRegistrationIdentities(txCtx, userID, row, now)
+				return grantRegistrationIdentitiesWithConfig(txCtx, userID, row, now, grants, existingByUser[userID], nil)
 			}); err != nil {
 				resultErr = errors.Join(resultErr, fmt.Errorf("用户 %d 补授注册身份失败: %w", userID, err))
 			}

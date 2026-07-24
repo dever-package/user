@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	coremiddleware "github.com/shemic/dever/middleware"
 	"github.com/shemic/dever/server"
 
+	uploadaccess "github.com/dever-package/front/service/upload/access"
 	"github.com/dever-package/user/authctx"
 	userservice "github.com/dever-package/user/service"
 )
@@ -18,7 +20,42 @@ var registerOnce sync.Once
 func Register() {
 	registerOnce.Do(func() {
 		coremiddleware.UseGlobalFunc(apiKeyActor())
+		coremiddleware.UseGlobalFunc(userSessionActor())
+		uploadaccess.RegisterBizPrefixPolicy(userservice.ProfileAvatarBizPrefix(), profileAvatarAccess)
 	})
+}
+
+func userSessionActor() coremiddleware.ContextFunc {
+	return func(ctx any) error {
+		c, ok := ctx.(*server.Context)
+		if !ok || c == nil {
+			return nil
+		}
+		actor, matched, err := userservice.UserTokenActor(c.Context())
+		if !matched {
+			return nil
+		}
+		if err != nil {
+			return abortUnauthorized(c, err.Error())
+		}
+		c.SetContext(userservice.WithActor(c.Context(), actor))
+		return nil
+	}
+}
+
+func profileAvatarAccess(_ context.Context, request uploadaccess.Request) (uploadaccess.Decision, error) {
+	if request.ActorID <= 0 || request.BizKey != userservice.ProfileAvatarBizKey(uint64(request.ActorID)) {
+		return uploadaccess.Deny, nil
+	}
+	if request.Kind != "" && request.Kind != "image" {
+		return uploadaccess.Deny, nil
+	}
+	switch request.Operation {
+	case uploadaccess.OperationCreate, uploadaccess.OperationRead, uploadaccess.OperationSign:
+		return uploadaccess.Allow, nil
+	default:
+		return uploadaccess.Deny, nil
+	}
 }
 
 func apiKeyActor() coremiddleware.ContextFunc {

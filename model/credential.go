@@ -8,6 +8,7 @@ import (
 
 const (
 	CredentialProviderPassword = "password"
+	CredentialProviderFeishu   = "feishu"
 
 	CredentialStatusEnabled  int16 = 1
 	CredentialStatusDisabled int16 = 2

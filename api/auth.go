@@ -55,3 +55,29 @@ func (Auth) GetProfile(c *server.Context) error {
 	data, err := (userservice.AuthService{}).Profile(c.Context())
 	return userJSON(c, data, err)
 }
+
+func (Auth) PostProfile(c *server.Context) error {
+	body, err := bindBody(c)
+	if err != nil {
+		return c.Error(err)
+	}
+	avatarFileID, avatarFileIDSet := bodyOptionalUint64(body, "avatar_file_id", "avatarFileId")
+	data, err := (userservice.ProfileService{}).Update(c.Context(), userservice.UpdateProfileRequest{
+		Name:            bodyText(body, "name", "nickname"),
+		AvatarFileID:    avatarFileID,
+		AvatarFileIDSet: avatarFileIDSet,
+	})
+	return userJSON(c, data, err)
+}
+
+func (Auth) PostPassword(c *server.Context) error {
+	body, err := bindBody(c)
+	if err != nil {
+		return c.Error(err)
+	}
+	data, err := (userservice.ProfileService{}).ChangePassword(c.Context(), userservice.ChangePasswordRequest{
+		CurrentPassword: bodyText(body, "current_password", "currentPassword"),
+		NewPassword:     bodyText(body, "new_password", "newPassword"),
+	})
+	return userJSON(c, data, err)
+}

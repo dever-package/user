@@ -18,6 +18,12 @@ const (
 
 func (UserHook) ProviderBeforeSavePointConfig(_ *server.Context, params []any) any {
 	payload := clonePointPayload(params)
+	if isUserPartialRecord(payload) {
+		if _, ok := payload["sort"]; ok {
+			payload["sort"] = normalizeUserSort(payload["sort"])
+		}
+		return payload
+	}
 
 	name := strings.TrimSpace(util.ToString(payload["name"]))
 	if name == "" {

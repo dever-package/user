@@ -33,7 +33,17 @@ type LoginRequest struct {
 	Password string
 }
 
-func (AuthService) Register(ctx context.Context, req RegisterRequest) (map[string]any, error) {
+func (AuthService) Register(ctx context.Context, req RegisterRequest) (result map[string]any, resultErr error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			if recoveredErr, ok := recovered.(error); ok {
+				resultErr = recoveredErr
+			} else {
+				resultErr = fmt.Errorf("%v", recovered)
+			}
+			result = nil
+		}
+	}()
 	account := normalizeAccount(req.Account)
 	password := strings.TrimSpace(req.Password)
 	name := strings.TrimSpace(req.Name)
@@ -62,12 +72,14 @@ func (AuthService) Register(ctx context.Context, req RegisterRequest) (map[strin
 	var userID uint64
 	if err := orm.Transaction(ctx, func(tx context.Context) error {
 		userID = uint64(usermodel.NewUserModel().Insert(tx, map[string]any{
-			"account":    account,
-			"name":       name,
-			"mobile":     "",
-			"status":     usermodel.UserStatusEnabled,
-			"remark":     "",
-			"created_at": now,
+			"account":         account,
+			"name":            name,
+			"mobile":          "",
+			"avatar_file_id":  uint64(0),
+			"session_version": uint64(1),
+			"status":          usermodel.UserStatusEnabled,
+			"remark":          "",
+			"created_at":      now,
 		}))
 		if userID == 0 {
 			return fmt.Errorf("注册失败")
@@ -201,7 +213,7 @@ func authPayload(ctx context.Context, user *usermodel.User, account string) (map
 		return nil, fmt.Errorf("用户不存在")
 	}
 	expiredAt := time.Now().Add(accessTokenTTL)
-	token, err := createUserToken(user.ID, expiredAt)
+	token, err := createUserToken(user.ID, normalizeSessionVersion(user.SessionVersion), expiredAt)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +229,7 @@ func authPayload(ctx context.Context, user *usermodel.User, account string) (map
 	}, nil
 }
 
-func createUserToken(userID uint64, expiredAt time.Time) (string, error) {
+func createUserToken(userID uint64, sessionVersion uint64, expiredAt time.Time) (string, error) {
 	cfg, err := config.Load("")
 	if err != nil {
 		return "", fmt.Errorf("读取配置失败")
@@ -228,14 +240,15 @@ func createUserToken(userID uint64, expiredAt time.Time) (string, error) {
 	}
 	now := time.Now()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"uid":        fmt.Sprintf("%d", userID),
-		"actor_id":   fmt.Sprintf("%d", userID),
-		"actor_type": ActorTypeUser,
-		"user_id":    fmt.Sprintf("%d", userID),
-		"site":       TokenScopeUser,
-		"scope":      TokenScopeUser,
-		"exp":        expiredAt.Unix(),
-		"iat":        now.Unix(),
+		"uid":             fmt.Sprintf("%d", userID),
+		"actor_id":        fmt.Sprintf("%d", userID),
+		"actor_type":      ActorTypeUser,
+		"user_id":         fmt.Sprintf("%d", userID),
+		"session_version": normalizeSessionVersion(sessionVersion),
+		"site":            TokenScopeUser,
+		"scope":           TokenScopeUser,
+		"exp":             expiredAt.Unix(),
+		"iat":             now.Unix(),
 	})
 	return token.SignedString([]byte(signer.Secret))
 }
@@ -262,13 +275,16 @@ func userPayload(ctx context.Context, user usermodel.User, account string) map[s
 	if account == "" {
 		account = primaryAccount(ctx, user.ID)
 	}
+	avatarFileID, avatarURL := userAvatarPayload(ctx, user.AvatarFileID)
 	return map[string]any{
-		"id":         user.ID,
-		"name":       user.Name,
-		"mobile":     user.Mobile,
-		"account":    firstNonEmpty(user.Account, account),
-		"status":     user.Status,
-		"created_at": user.CreatedAt,
+		"id":             user.ID,
+		"name":           user.Name,
+		"mobile":         user.Mobile,
+		"account":        firstNonEmpty(user.Account, account),
+		"avatar_file_id": avatarFileID,
+		"avatar":         avatarURL,
+		"status":         user.Status,
+		"created_at":     user.CreatedAt,
 	}
 }
 

@@ -1,0 +1,134 @@
+{
+  "page": {
+    "name": "积分套餐编辑",
+    "parent": "user/point_package/list",
+    "type": 2,
+    "auth": [
+      {
+        "key": "user/point_package/create",
+        "name": "积分套餐新增",
+        "query": {
+          "id": "empty"
+        }
+      },
+      {
+        "key": "user/point_package/update",
+        "name": "积分套餐编辑",
+        "query": {
+          "id": "required"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "type": "container",
+    "children": {
+      "page-main": {
+        "type": "main",
+        "className": "p-0",
+        "children": {
+          "dialog-shell": {
+            "type": "container",
+            "className": "w-full"
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "dialog-shell": [
+      {
+        "type": "form-input",
+        "name": "套餐名称",
+        "placeholder": "例如：1000 积分",
+        "value": "form.name",
+        "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "套餐名称不能为空。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-select",
+        "name": "积分类型",
+        "placeholder": "请选择积分类型",
+        "value": "form.point_config_id",
+        "mode": "form",
+        "option": "option.point_config",
+        "validate": [
+          {
+            "type": "required",
+            "message": "请选择积分类型。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal"
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "基础积分",
+        "value": "form.point_amount",
+        "mode": "form",
+        "info": "现金价格由基础积分和积分配置中的货币换算自动计算。",
+        "validate": [
+          {
+            "type": "required",
+            "message": "基础积分不能为空。"
+          },
+          {
+            "type": "min",
+            "min": 1,
+            "message": "基础积分必须大于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[200px]"
+        }
+      },
+      {
+        "type": "form-number",
+        "name": "赠送积分",
+        "value": "form.bonus_amount",
+        "mode": "form",
+        "info": "赠送积分不参与现金价格计算。",
+        "validate": [
+          {
+            "type": "min",
+            "min": 0,
+            "message": "赠送积分不能小于 0。"
+          }
+        ],
+        "meta": {
+          "formLayout": "horizontal",
+          "controlClassName": "max-w-[200px]"
+        }
+      }
+    ]
+  },
+  "data": {
+    "form": {
+      "id": "",
+      "name": "",
+      "point_config_id": 1,
+      "point_amount": 1000,
+      "bonus_amount": 0
+    }
+  },
+  "state": {},
+  "action": {
+    "submit": {
+      "type": "save",
+      "params": "form",
+      "before": {
+        "service": "user.PointPackageService.BeforeSave"
+      }
+    }
+  }
+}

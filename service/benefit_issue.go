@@ -55,7 +55,7 @@ func (BenefitService) IssueDueIdentityBenefits(ctx context.Context, now time.Tim
 		}
 		stats.BenefitCount++
 		for page := 1; ; page++ {
-			userIdentityRows := activeUserIdentityRowsForBenefit(ctx, benefitRow, now, 0, page, 200)
+			userIdentityRows, hasMore := activeUserIdentityRowsForBenefit(ctx, benefitRow, now, 0, page, 200)
 			for _, userIdentityRow := range userIdentityRows {
 				stats.UserCount++
 				result, err := issueIdentityBenefitToUser(ctx, benefitRow, userIdentityRow, now)
@@ -75,7 +75,7 @@ func (BenefitService) IssueDueIdentityBenefits(ctx context.Context, now time.Tim
 					stats.ClearedAmount += result.clearedAmount
 				}
 			}
-			if len(userIdentityRows) < 200 {
+			if !hasMore {
 				break
 			}
 		}
@@ -83,20 +83,22 @@ func (BenefitService) IssueDueIdentityBenefits(ctx context.Context, now time.Tim
 	return stats.toMap(now, resultErr), resultErr
 }
 
-func issueDueIdentityBenefitsForUser(ctx context.Context, userID uint64, now time.Time) error {
+func issueDueIdentityBenefitForUserIdentity(ctx context.Context, userIdentityRow map[string]any, now time.Time) error {
+	if len(userIdentityRow) == 0 {
+		return nil
+	}
 	benefitRows := usermodel.NewIdentityBenefitModel().SelectMap(ctx, map[string]any{
 		"benefit_type": benefitTypeRewardPoint,
 		"status":       identityStatusEnabled,
-	}, map[string]any{"order": "identity_id asc,level asc,sort asc,id asc"})
+		"identity_id":  util.ToUint64(userIdentityRow["identity_id"]),
+		"level_id":     util.ToUint64(userIdentityRow["level_id"]),
+	}, map[string]any{"order": "sort asc,id asc"})
 	for _, benefitRow := range benefitRows {
 		if !isRunnableIdentityBenefit(benefitRow) {
 			continue
 		}
-		rows := activeUserIdentityRowsForBenefit(ctx, benefitRow, now, userID, 1, 100)
-		for _, row := range rows {
-			if _, err := issueIdentityBenefitToUser(ctx, benefitRow, row, now); err != nil {
-				return err
-			}
+		if _, err := issueIdentityBenefitToUser(ctx, benefitRow, userIdentityRow, now); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -168,24 +170,33 @@ func isRunnableIdentityBenefit(row map[string]any) bool {
 		normalizeUserStatus(row["status"]) == identityStatusEnabled &&
 		util.ToIntDefault(row["point_amount"], 0) > 0 &&
 		util.ToIntDefault(row["point_amount"], 0) <= maxPointChangeAmount &&
-		normalizeBenefitPositiveInt(row["cycle_days"], 1) <= maxBenefitCycleDays &&
-		normalizeBenefitPositiveInt(row["limit_times"], 1) <= maxBenefitLimitTimes
+		util.ToIntDefault(row["cycle_days"], 0) > 0 &&
+		util.ToIntDefault(row["cycle_days"], 0) <= maxBenefitCycleDays &&
+		util.ToIntDefault(row["limit_times"], 0) > 0 &&
+		util.ToIntDefault(row["limit_times"], 0) <= maxBenefitLimitTimes
 }
 
-func activeUserIdentityRowsForBenefit(ctx context.Context, benefitRow map[string]any, now time.Time, userID uint64, page int, pageSize int) []map[string]any {
+func activeUserIdentityRowsForBenefit(ctx context.Context, benefitRow map[string]any, now time.Time, userID uint64, page int, pageSize int) ([]map[string]any, bool) {
 	filters := map[string]any{
 		"identity_id": util.ToUint64(benefitRow["identity_id"]),
 		"level_id":    util.ToUint64(benefitRow["level_id"]),
 		"status":      identityStatusEnabled,
-		"expires_at":  map[string]any{"gt": now},
 	}
 	if userID > 0 {
 		filters["user_id"] = userID
 	}
-	return usermodel.NewUserIdentityModel().SelectMap(ctx, filters, map[string]any{
+	rows := usermodel.NewUserIdentityModel().SelectMap(ctx, filters, map[string]any{
 		"order": "user_id asc,id asc",
 		"page":  page, "pageSize": pageSize,
 	})
+	result := make([]map[string]any, 0, len(rows))
+	for _, row := range rows {
+		expiresAt := normalizeUserIdentityTime(row["expired_at"])
+		if !expiresAt.IsZero() && expiresAt.After(now) {
+			result = append(result, row)
+		}
+	}
+	return result, len(rows) == pageSize
 }
 
 func currentIdentityBenefitCycle(benefitRow map[string]any, userIdentityRow map[string]any, now time.Time) (identityBenefitCycle, bool) {
@@ -243,6 +254,8 @@ func clearPreviousIdentityBenefitGrants(ctx context.Context, userIdentityRow map
 		"user_identity_id":    util.ToUint64(userIdentityRow["id"]),
 		"identity_benefit_id": util.ToUint64(benefitRow["id"]),
 		"status":              benefitGrantStatusActive,
+		"remaining_amount":    map[string]any{"gt": 0},
+		"cycle_start_at":      map[string]any{"lt": currentCycleStartAt},
 	}, map[string]any{
 		"order": "cycle_start_at asc,grant_no asc,id asc",
 	})
@@ -252,8 +265,7 @@ func clearPreviousIdentityBenefitGrants(ctx context.Context, userIdentityRow map
 	for _, row := range rows {
 		grantID := util.ToUint64(row["id"])
 		remainingAmount := util.ToIntDefault(row["remaining_amount"], 0)
-		cycleStartAt := normalizeUserIdentityTime(row["cycle_start_at"])
-		if grantID == 0 || remainingAmount <= 0 || cycleStartAt.IsZero() || !cycleStartAt.Before(currentCycleStartAt) {
+		if grantID == 0 || remainingAmount <= 0 {
 			continue
 		}
 		grantIDs = append(grantIDs, grantID)

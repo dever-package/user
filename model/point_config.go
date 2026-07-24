@@ -13,6 +13,7 @@ type PointConfig struct {
 	ExchangeRate   int       `dorm:"type:int;not null;default:100;comment:货币换算"`
 	Symbol         string    `dorm:"type:varchar(16);not null;default:'';comment:积分符号"`
 	SymbolPosition int16     `dorm:"type:smallint;not null;default:1;comment:符号位置"`
+	Sort           int       `dorm:"type:int;not null;default:100;comment:排序"`
 	CreatedAt      time.Time `dorm:"not null;default:CURRENT_TIMESTAMP;comment:创建时间"`
 }
 
@@ -24,13 +25,14 @@ var pointConfigSeed = []map[string]any{
 		"exchange_rate":   100,
 		"symbol":          "积分",
 		"symbol_position": 2,
+		"sort":            100,
 	},
 }
 
 func NewPointConfigModel() *orm.Model[PointConfig] {
 	return orm.LoadModel[PointConfig]("积分配置", "user_point_config", orm.ModelConfig{
 		Seeds:    pointConfigSeed,
-		Order:    "id desc",
+		Order:    "sort asc,id asc",
 		Database: "default",
 		Options: map[string]any{
 			"symbol_position": pointSymbolPositionOptions,

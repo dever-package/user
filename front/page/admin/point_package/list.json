@@ -1,9 +1,9 @@
 {
   "page": {
-    "name": "积分配置",
-    "icon": "circle-dollar-sign",
+    "name": "积分套餐",
+    "icon": "package-open",
     "parent": "user-config",
-    "sort": 1
+    "sort": 2
   },
   "layout": {
     "type": "container",
@@ -48,8 +48,7 @@
     "header-actions": [
       {
         "type": "show-button",
-        "name": "新增积分配置",
-        "className": "shrink-0",
+        "name": "新增套餐",
         "meta": {
           "variant": "default",
           "size": "sm",
@@ -67,8 +66,21 @@
     "toolbar-row": [
       {
         "type": "form-input",
-        "placeholder": "筛选积分名称...",
+        "placeholder": "搜索套餐名称...",
         "value": "search.keyword",
+        "mode": "search"
+      },
+      {
+        "type": "form-select",
+        "placeholder": "积分类型",
+        "value": "search.point_config_id",
+        "mode": "search",
+        "option": "option.point_config"
+      },
+      {
+        "type": "form-select",
+        "placeholder": "状态",
+        "value": "search.status",
         "mode": "search"
       },
       {
@@ -78,7 +90,6 @@
           "variant": "default",
           "size": "sm",
           "searchSubmit": true,
-          "searchLayoutId": "toolbar-row",
           "loadingText": "搜索中..."
         }
       },
@@ -88,8 +99,7 @@
         "meta": {
           "variant": "outline",
           "size": "sm",
-          "searchLayoutId": "toolbar-row",
-          "to": "/user/point_config/list"
+          "to": "/user/point_package/list"
         }
       }
     ],
@@ -103,32 +113,38 @@
           "totalPath": "data.table.total",
           "remote": true,
           "externalPagination": true,
-          "savePath": "user/point_config/update",
+          "savePath": "user/point_package/update",
           "rowKey": "id",
           "columns": [
             {
-              "value": "id",
-              "name": "配置ID",
-              "type": "show-base",
-              "className": "w-[1%] whitespace-nowrap text-center"
-            },
-            {
               "value": "name",
-              "type": "show-base"
+              "type": "show-base",
+              "className": "font-medium"
             },
             {
-              "value": "exchange_rate",
+              "value": "point_config_id",
+              "type": "show-tag",
+              "meta": {
+                "option": "option.point_config"
+              }
+            },
+            {
+              "value": "point_amount",
               "type": "show-base",
               "className": "text-center"
             },
             {
-              "value": "symbol",
+              "value": "bonus_amount",
               "type": "show-base",
               "className": "text-center"
             },
             {
-              "value": "symbol_position",
-              "type": "show-tag"
+              "value": "status",
+              "type": "form-switch",
+              "meta": {
+                "trueValue": 1,
+                "falseValue": 2
+              }
             },
             {
               "value": "sort",
@@ -151,7 +167,7 @@
                     "icon": "square-pen",
                     "variant": "outline",
                     "size": "sm",
-                    "description": "编辑积分配置",
+                    "description": "编辑套餐",
                     "action": {
                       "click": [
                         {
@@ -171,13 +187,13 @@
                     "icon": "trash-2",
                     "variant": "outline",
                     "size": "sm",
-                    "description": "删除积分配置",
+                    "description": "删除套餐",
                     "className": "text-destructive hover:text-destructive",
                     "action": {
                       "click": [
                         {
                           "type": "data",
-                          "key": "actionTarget.deleteConfig",
+                          "key": "actionTarget.deletePackage",
                           "value": "$row"
                         },
                         {
@@ -203,50 +219,45 @@
         "type": "feedback-modal",
         "meta": {
           "stateKey": "dialog.create",
-          "pageRoute": "/user/point_config/update",
-          "title": "新增积分配置",
-          "description": "维护积分和支付货币之间的换算规则。",
+          "pageRoute": "/user/point_package/update",
+          "title": "新增积分套餐",
+          "description": "配置工作台可购买的固定积分套餐。",
+          "size": "lg",
           "footer": {
             "confirm": true,
             "confirmText": "保存"
-          },
-          "size": "lg",
-          "bodyClassName": "py-2"
+          }
         }
       },
       {
         "type": "feedback-modal",
         "meta": {
           "stateKey": "dialog.edit",
-          "pageRoute": "/user/point_config/update",
-          "title": "编辑积分配置",
-          "description": "调整积分名称、介绍、换算和符号展示。",
-          "footer": {
-            "confirm": true,
-            "confirmText": "保存"
-          },
+          "pageRoute": "/user/point_package/update",
+          "title": "编辑积分套餐",
+          "description": "调整基础积分和赠送积分。",
+          "size": "lg",
           "pageRouteQuery": {
             "id": "data.actionTarget.editId"
           },
-          "size": "lg",
-          "bodyClassName": "py-2"
+          "footer": {
+            "confirm": true,
+            "confirmText": "保存"
+          }
         }
       },
       {
         "type": "feedback-confirm",
-        "name": "删除积分配置",
-        "info": "确认删除当前积分配置吗？",
+        "name": "删除积分套餐",
+        "info": "确认删除当前积分套餐吗？历史订单快照不会受影响。",
         "meta": {
           "stateKey": "confirm.delete"
         },
         "action": {
           "confirm": {
             "type": "delete",
-            "path": "user/point_config/update",
-            "params": "actionTarget.deleteConfig",
-            "before": {
-              "service": "user.UserHook.BeforeDeletePointConfig"
-            }
+            "path": "user/point_package/update",
+            "params": "actionTarget.deletePackage"
           }
         }
       }
@@ -254,11 +265,13 @@
   },
   "data": {
     "page": {
-      "title": "积分配置",
-      "description": "维护积分名称、介绍、货币换算和符号展示。"
+      "title": "积分套餐",
+      "description": "维护用户主动购买积分时可选择的固定套餐。"
     },
     "search": {
-      "keyword": ""
+      "keyword": "",
+      "point_config_id": "",
+      "status": ""
     },
     "table": {
       "searchFields": [
@@ -268,7 +281,7 @@
     },
     "actionTarget": {
       "editId": "",
-      "deleteConfig": {}
+      "deletePackage": {}
     }
   },
   "state": {

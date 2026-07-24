@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	deverjwt "github.com/shemic/dever/auth/jwt"
+	"github.com/shemic/dever/util"
 
 	usermodel "github.com/dever-package/user/model"
 )
@@ -105,20 +106,32 @@ func ActorContext(ctx context.Context, actor Actor) context.Context {
 }
 
 func actorFromJWT(ctx context.Context) (Actor, bool) {
+	actor, matched, err := UserTokenActor(ctx)
+	return actor, matched && err == nil
+}
+
+func UserTokenActor(ctx context.Context) (Actor, bool, error) {
 	claims := deverjwt.Claims(ctx)
 	if len(claims) == 0 {
-		return Actor{}, false
+		return Actor{}, false, nil
 	}
 
 	scope := cleanClaim(claims["scope"])
 	site := cleanClaim(claims["site"])
 	if scope != TokenScopeUser && site != TokenScopeUser {
-		return Actor{}, false
+		return Actor{}, false, nil
 	}
 
 	uid, ok := deverjwt.ActiveInt64(ctx)
 	if !ok || uid <= 0 {
-		return Actor{}, false
+		return Actor{}, true, NewAuthRequiredError("登录状态已失效")
+	}
+	user := usermodel.NewUserModel().Find(ctx, map[string]any{
+		"id":     uint64(uid),
+		"status": usermodel.UserStatusEnabled,
+	})
+	if user == nil || normalizeSessionVersion(user.SessionVersion) != claimSessionVersion(claims["session_version"]) {
+		return Actor{}, true, NewAuthRequiredError("登录状态已失效，请重新登录")
 	}
 
 	actorType := cleanClaim(claims["actor_type"])
@@ -132,7 +145,18 @@ func actorFromJWT(ctx context.Context) (Actor, bool) {
 		Site:   site,
 		Scope:  scope,
 		Scopes: splitScopes(scope),
-	}, true
+	}, true, nil
+}
+
+func normalizeSessionVersion(value uint64) uint64 {
+	if value == 0 {
+		return 1
+	}
+	return value
+}
+
+func claimSessionVersion(value any) uint64 {
+	return normalizeSessionVersion(util.ToUint64(value))
 }
 
 func cleanClaim(value any) string {

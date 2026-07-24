@@ -222,6 +222,10 @@ func SettlePoints(ctx context.Context, request PointSettleRequest) (PointHoldRes
 		},
 	})
 	if err != nil {
+		latest := pointHoldByBusinessKey(ctx, request.BusinessKey)
+		if int16(util.ToIntDefault(latest["status"], 0)) == usermodel.PointHoldStatusSettled {
+			return pointHoldResult(latest), nil
+		}
 		return PointHoldResult{}, err
 	}
 	result := pointHoldResult(pointHoldByBusinessKey(ctx, request.BusinessKey))
