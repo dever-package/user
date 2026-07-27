@@ -41,7 +41,7 @@ func (AccountService) Overview(ctx context.Context) (map[string]any, error) {
 	return map[string]any{
 		"user": map[string]any{
 			"id": userID, "name": strings.TrimSpace(util.ToString(userRow["name"])),
-			"mobile": strings.TrimSpace(util.ToString(userRow["mobile"])),
+			"account": strings.TrimSpace(util.ToString(userRow["account"])),
 		},
 		"point_accounts": accountPointBalances(ctx, pointConfigRows, pointAccountRows, now),
 		"subscriptions":  subscriptionState.items,

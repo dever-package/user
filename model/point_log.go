@@ -44,7 +44,7 @@ var pointLogUserRelation = orm.Relation{
 	Field:      "user_id",
 	Name:       "user",
 	Option:     "user.NewUserModel",
-	OptionKeys: []string{"name", "mobile"},
+	OptionKeys: []string{"name", "account"},
 }
 
 var pointLogUserPointRelation = orm.Relation{

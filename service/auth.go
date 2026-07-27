@@ -44,22 +44,22 @@ func (AuthService) Register(ctx context.Context, req RegisterRequest) (result ma
 			result = nil
 		}
 	}()
-	account := normalizeAccount(req.Account)
+	account, err := requirePhoneAccount(req.Account)
+	if err != nil {
+		return nil, err
+	}
 	password := strings.TrimSpace(req.Password)
 	name := strings.TrimSpace(req.Name)
-	if account == "" || password == "" {
-		return nil, fmt.Errorf("账号和密码不能为空")
+	if password == "" {
+		return nil, fmt.Errorf("密码不能为空")
 	}
 	if len([]rune(password)) < 6 {
 		return nil, fmt.Errorf("密码不能少于 6 位")
 	}
-	credentialModel := usermodel.NewCredentialModel()
-	if credentialModel.Find(ctx, map[string]any{
-		"provider": usermodel.CredentialProviderPassword,
-		"account":  account,
-	}) != nil {
-		return nil, fmt.Errorf("账号已存在")
+	if err := ensureUserAccountAvailable(ctx, account, 0); err != nil {
+		return nil, err
 	}
+	credentialModel := usermodel.NewCredentialModel()
 	if name == "" {
 		name = account
 	}
@@ -74,7 +74,6 @@ func (AuthService) Register(ctx context.Context, req RegisterRequest) (result ma
 		userID = uint64(usermodel.NewUserModel().Insert(tx, map[string]any{
 			"account":         account,
 			"name":            name,
-			"mobile":          "",
 			"avatar_file_id":  uint64(0),
 			"session_version": uint64(1),
 			"status":          usermodel.UserStatusEnabled,
@@ -96,9 +95,9 @@ func (AuthService) Register(ctx context.Context, req RegisterRequest) (result ma
 			return fmt.Errorf("注册失败")
 		}
 		if err := initializeRegistrationBenefits(tx, userID, map[string]any{
-			"id":     userID,
-			"name":   name,
-			"mobile": "",
+			"id":      userID,
+			"name":    name,
+			"account": account,
 		}, now); err != nil {
 			return err
 		}
@@ -110,10 +109,10 @@ func (AuthService) Register(ctx context.Context, req RegisterRequest) (result ma
 }
 
 func (AuthService) Login(ctx context.Context, req LoginRequest) (map[string]any, error) {
-	account := normalizeAccount(req.Account)
+	account, accountErr := requirePhoneAccount(req.Account)
 	password := strings.TrimSpace(req.Password)
-	if account == "" || password == "" {
-		return nil, fmt.Errorf("账号和密码不能为空")
+	if accountErr != nil || password == "" {
+		return nil, fmt.Errorf("手机号或密码错误")
 	}
 
 	credential := usermodel.NewCredentialModel().Find(ctx, map[string]any{
@@ -122,7 +121,7 @@ func (AuthService) Login(ctx context.Context, req LoginRequest) (map[string]any,
 		"status":   usermodel.CredentialStatusEnabled,
 	})
 	if credential == nil || !verifyPassword(password, credential.PasswordHash) {
-		return nil, fmt.Errorf("账号或密码错误")
+		return nil, fmt.Errorf("手机号或密码错误")
 	}
 
 	user := usermodel.NewUserModel().Find(ctx, map[string]any{
@@ -130,7 +129,7 @@ func (AuthService) Login(ctx context.Context, req LoginRequest) (map[string]any,
 		"status": usermodel.UserStatusEnabled,
 	})
 	if user == nil {
-		return nil, fmt.Errorf("账号或密码错误")
+		return nil, fmt.Errorf("手机号或密码错误")
 	}
 	return authPayload(ctx, user, account)
 }
@@ -279,7 +278,6 @@ func userPayload(ctx context.Context, user usermodel.User, account string) map[s
 	return map[string]any{
 		"id":             user.ID,
 		"name":           user.Name,
-		"mobile":         user.Mobile,
 		"account":        firstNonEmpty(user.Account, account),
 		"avatar_file_id": avatarFileID,
 		"avatar":         avatarURL,
@@ -301,10 +299,6 @@ func primaryAccount(ctx context.Context, userID uint64) string {
 		return ""
 	}
 	return credential.Account
-}
-
-func normalizeAccount(account string) string {
-	return strings.ToLower(strings.TrimSpace(account))
 }
 
 func firstNonEmpty(values ...string) string {

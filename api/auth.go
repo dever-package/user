@@ -9,45 +9,45 @@ import (
 type Auth struct{}
 
 func (Auth) PostRegister(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}
 	data, err := (userservice.AuthService{}).Register(c.Context(), userservice.RegisterRequest{
-		Account:  bodyText(body, "account", "username", "mobile"),
-		Password: bodyText(body, "password"),
-		Name:     bodyText(body, "name", "nickname"),
+		Account:  BodyText(body, "account", "username", "mobile"),
+		Password: BodyText(body, "password"),
+		Name:     BodyText(body, "name", "nickname"),
 	})
 	return userJSON(c, data, err)
 }
 
 func (Auth) PostLogin(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}
 	data, err := (userservice.AuthService{}).Login(c.Context(), userservice.LoginRequest{
-		Account:  bodyText(body, "account", "username", "mobile"),
-		Password: bodyText(body, "password"),
+		Account:  BodyText(body, "account", "username", "mobile"),
+		Password: BodyText(body, "password"),
 	})
 	return userJSON(c, data, err)
 }
 
 func (Auth) PostRefresh(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}
-	data, err := (userservice.AuthService{}).Refresh(c.Context(), bodyText(body, "refresh_token", "refreshToken"))
+	data, err := (userservice.AuthService{}).Refresh(c.Context(), BodyText(body, "refresh_token", "refreshToken"))
 	return userJSON(c, data, err)
 }
 
 func (Auth) PostLogout(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}
-	data, err := (userservice.AuthService{}).Logout(c.Context(), bodyText(body, "refresh_token", "refreshToken"))
+	data, err := (userservice.AuthService{}).Logout(c.Context(), BodyText(body, "refresh_token", "refreshToken"))
 	return userJSON(c, data, err)
 }
 
@@ -57,13 +57,13 @@ func (Auth) GetProfile(c *server.Context) error {
 }
 
 func (Auth) PostProfile(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}
 	avatarFileID, avatarFileIDSet := bodyOptionalUint64(body, "avatar_file_id", "avatarFileId")
 	data, err := (userservice.ProfileService{}).Update(c.Context(), userservice.UpdateProfileRequest{
-		Name:            bodyText(body, "name", "nickname"),
+		Name:            BodyText(body, "name", "nickname"),
 		AvatarFileID:    avatarFileID,
 		AvatarFileIDSet: avatarFileIDSet,
 	})
@@ -71,13 +71,13 @@ func (Auth) PostProfile(c *server.Context) error {
 }
 
 func (Auth) PostPassword(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}
 	data, err := (userservice.ProfileService{}).ChangePassword(c.Context(), userservice.ChangePasswordRequest{
-		CurrentPassword: bodyText(body, "current_password", "currentPassword"),
-		NewPassword:     bodyText(body, "new_password", "newPassword"),
+		CurrentPassword: BodyText(body, "current_password", "currentPassword"),
+		NewPassword:     BodyText(body, "new_password", "newPassword"),
 	})
 	return userJSON(c, data, err)
 }

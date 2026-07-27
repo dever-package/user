@@ -39,7 +39,7 @@ var userIdentityUserRelation = orm.Relation{
 	Field:      "user_id",
 	Name:       "user",
 	Option:     "user.NewUserModel",
-	OptionKeys: []string{"name", "mobile", "status"},
+	OptionKeys: []string{"name", "account", "status"},
 }
 
 var userIdentityIdentityRelation = orm.Relation{

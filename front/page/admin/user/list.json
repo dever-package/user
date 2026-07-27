@@ -66,7 +66,7 @@
     "toolbar-row": [
       {
         "type": "form-input",
-        "placeholder": "筛选账号、姓名或手机号...",
+        "placeholder": "筛选姓名或手机号...",
         "value": "search.keyword",
         "mode": "search"
       },
@@ -127,10 +127,6 @@
             },
             {
               "value": "account",
-              "type": "show-base"
-            },
-            {
-              "value": "mobile",
               "type": "show-base"
             },
             {
@@ -221,7 +217,7 @@
           "stateKey": "dialog.create",
           "pageRoute": "/user/user/update",
           "title": "新增用户",
-          "description": "维护业务员用户的基础信息。",
+          "description": "维护用户手机号、姓名和登录密码。",
           "footer": {
             "confirm": true,
             "confirmText": "保存"
@@ -236,7 +232,7 @@
           "stateKey": "dialog.edit",
           "pageRoute": "/user/user/update",
           "title": "编辑用户",
-          "description": "调整业务员用户的姓名、手机号和备注。",
+          "description": "调整用户资料；密码留空表示不修改。",
           "footer": {
             "confirm": true,
             "confirmText": "保存"
@@ -271,7 +267,7 @@
   "data": {
     "page": {
       "title": "用户信息",
-      "description": "维护业务员用户的基础信息，积分余额和用户身份仅作汇总展示。"
+      "description": "维护用户手机号、姓名和登录状态，积分余额和用户身份仅作汇总展示。"
     },
     "search": {
       "keyword": "",
@@ -280,7 +276,7 @@
     "table": {
       "searchFields": [
         "name",
-        "mobile"
+        "account"
       ],
       "filterFields": [
         "status"

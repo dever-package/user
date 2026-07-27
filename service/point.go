@@ -297,7 +297,7 @@ func (PointService) ProviderAttachUserInfo(c *server.Context, params []any) any 
 	userRows := usermodel.NewUserModel().SelectMap(c.Context(), map[string]any{
 		"id": userIDs,
 	}, map[string]any{
-		"field": "main.id, main.name, main.mobile",
+		"field": "main.id, main.name, main.account",
 	})
 	users := map[uint64]map[string]any{}
 	for _, userRow := range userRows {
@@ -327,7 +327,7 @@ func (PointService) ProviderAttachUserIdentityListInfo(c *server.Context, params
 		users = rowsByID(usermodel.NewUserModel().SelectMap(c.Context(), map[string]any{
 			"id": userIDs,
 		}, map[string]any{
-			"field": "main.id, main.name, main.mobile",
+			"field": "main.id, main.name, main.account",
 		}))
 	}
 
@@ -362,43 +362,6 @@ func (PointService) ProviderAttachUserIdentityListInfo(c *server.Context, params
 	return rows
 }
 
-func (UserHook) ProviderBeforeSaveUser(_ *server.Context, params []any) any {
-	payload := clonePointPayload(params)
-	if nameValue, ok := payload["name"]; ok {
-		payload["name"] = strings.TrimSpace(util.ToString(nameValue))
-		if payload["name"] == "" {
-			panic(frontaction.NewFieldError("form.name", "姓名不能为空。"))
-		}
-	}
-	if mobileValue, ok := payload["mobile"]; ok {
-		payload["mobile"] = strings.TrimSpace(util.ToString(mobileValue))
-	}
-	if remarkValue, ok := payload["remark"]; ok {
-		payload["remark"] = strings.TrimSpace(util.ToString(remarkValue))
-	}
-
-	return payload
-}
-
-func (UserHook) ProviderAfterSaveUser(c *server.Context, params []any) any {
-	payload := clonePointPayload(params)
-	userID := util.ToUint64(payload["id"])
-	if userID == 0 {
-		return payload
-	}
-	if err := syncUserPointSnapshots(c.Context(), userID); err != nil {
-		panic(err)
-	}
-	result, _ := payload["result"].(map[string]any)
-	if util.ToBool(result["created"]) {
-		userRow := usermodel.NewUserModel().FindMap(c.Context(), map[string]any{"id": userID})
-		if err := initializeRegistrationBenefits(c.Context(), userID, userRow, time.Now()); err != nil {
-			panic(err)
-		}
-	}
-	return payload
-}
-
 func (UserHook) ProviderBeforeDeleteUser(c *server.Context, params []any) any {
 	payload := clonePointPayload(params)
 	userID := util.ToUint64(payload["id"])
@@ -421,6 +384,8 @@ func (UserHook) ProviderBeforeDeleteUser(c *server.Context, params []any) any {
 	}
 	usermodel.NewUserPointModel().Delete(c.Context(), map[string]any{"user_id": userID})
 	usermodel.NewUserIdentityModel().Delete(c.Context(), map[string]any{"user_id": userID})
+	usermodel.NewTokenModel().Delete(c.Context(), map[string]any{"user_id": userID})
+	usermodel.NewCredentialModel().Delete(c.Context(), map[string]any{"user_id": userID})
 	return map[string]any{"id": userID}
 }
 
@@ -595,7 +560,7 @@ func adjustUserPointsOnce(ctx context.Context, request pointAdjustRequest) (poin
 			"user_point_id":         userPointID,
 			"user_id":               request.userID,
 			"user_name":             strings.TrimSpace(util.ToString(userRow["name"])),
-			"user_mobile":           strings.TrimSpace(util.ToString(userRow["mobile"])),
+			"user_mobile":           strings.TrimSpace(util.ToString(userRow["account"])),
 			"point_config_id":       request.pointConfigID,
 			"point_name":            pointSnapshot.name,
 			"point_symbol":          pointSnapshot.symbol,
@@ -696,11 +661,11 @@ func syncUserPointSnapshots(ctx context.Context, userID uint64) error {
 	}
 	userPointModel.Update(ctx, map[string]any{"user_id": userID}, map[string]any{
 		"user_name":   strings.TrimSpace(util.ToString(userRow["name"])),
-		"user_mobile": strings.TrimSpace(util.ToString(userRow["mobile"])),
+		"user_mobile": strings.TrimSpace(util.ToString(userRow["account"])),
 	}, false)
 	usermodel.NewUserIdentityModel().Update(ctx, map[string]any{"user_id": userID}, map[string]any{
 		"user_name":   strings.TrimSpace(util.ToString(userRow["name"])),
-		"user_mobile": strings.TrimSpace(util.ToString(userRow["mobile"])),
+		"user_mobile": strings.TrimSpace(util.ToString(userRow["account"])),
 	}, false)
 	return nil
 }
@@ -803,7 +768,7 @@ func userPointSnapshot(userRow map[string]any, pointRow map[string]any) map[stri
 	return map[string]any{
 		"user_id":               util.ToUint64(userRow["id"]),
 		"user_name":             strings.TrimSpace(util.ToString(userRow["name"])),
-		"user_mobile":           strings.TrimSpace(util.ToString(userRow["mobile"])),
+		"user_mobile":           strings.TrimSpace(util.ToString(userRow["account"])),
 		"point_config_id":       util.ToUint64(pointRow["id"]),
 		"point_name":            pointSnapshot.name,
 		"point_symbol":          pointSnapshot.symbol,
@@ -979,16 +944,16 @@ func formatUserIdentityLine(row map[string]any) string {
 
 func formatUserInfo(row map[string]any, userRow map[string]any) string {
 	name := strings.TrimSpace(util.ToString(userRow["name"]))
-	mobile := strings.TrimSpace(util.ToString(userRow["mobile"]))
+	account := strings.TrimSpace(util.ToString(userRow["account"]))
 	if name == "" {
 		name = strings.TrimSpace(util.ToString(row["user_name"]))
 	}
-	if mobile == "" {
-		mobile = strings.TrimSpace(util.ToString(row["user_mobile"]))
+	if account == "" {
+		account = strings.TrimSpace(util.ToString(row["user_mobile"]))
 	}
 	values := []string{
 		name,
-		mobile,
+		account,
 		strings.TrimSpace(util.ToString(row["user_id"])),
 	}
 	parts := make([]string, 0, len(values))

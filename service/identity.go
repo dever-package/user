@@ -72,7 +72,7 @@ func loadIdentityOptions(c *server.Context, filters map[string]any) []map[string
 func (UserOptionService) ProviderLoadUsers(c *server.Context, _ []any) any {
 	keyword := strings.TrimSpace(c.Input("keyword"))
 	rows := usermodel.NewUserModel().SelectMap(c.Context(), userOptionFilters(keyword), map[string]any{
-		"field":    "main.id, main.name, main.mobile",
+		"field":    "main.id, main.name, main.account",
 		"order":    "main.id desc",
 		"pageSize": normalizeUserOptionPageSize(c.Input("pageSize")),
 	})
@@ -80,11 +80,11 @@ func (UserOptionService) ProviderLoadUsers(c *server.Context, _ []any) any {
 	for _, row := range rows {
 		label := formatUserOptionInfo(row)
 		result = append(result, map[string]any{
-			"id":     util.ToUint64(row["id"]),
-			"value":  label,
-			"label":  label,
-			"name":   label,
-			"mobile": strings.TrimSpace(util.ToString(row["mobile"])),
+			"id":      util.ToUint64(row["id"]),
+			"value":   label,
+			"label":   label,
+			"name":    label,
+			"account": strings.TrimSpace(util.ToString(row["account"])),
 		})
 	}
 	return result
@@ -220,7 +220,7 @@ func userOptionFilters(keyword string) any {
 	return map[string]any{
 		"or": []any{
 			map[string]any{"main.name": map[string]any{"like": "%" + keyword + "%"}},
-			map[string]any{"main.mobile": map[string]any{"like": "%" + keyword + "%"}},
+			map[string]any{"main.account": map[string]any{"like": "%" + keyword + "%"}},
 		},
 	}
 }
@@ -239,7 +239,7 @@ func normalizeUserOptionPageSize(value any) int {
 func formatUserOptionInfo(row map[string]any) string {
 	values := []string{
 		strings.TrimSpace(util.ToString(row["name"])),
-		strings.TrimSpace(util.ToString(row["mobile"])),
+		strings.TrimSpace(util.ToString(row["account"])),
 		strings.TrimSpace(util.ToString(row["id"])),
 	}
 	parts := make([]string, 0, len(values))
@@ -444,7 +444,7 @@ func (UserHook) ProviderBeforeSaveUserIdentity(c *server.Context, params []any) 
 
 	payload["user_id"] = normalized.userID
 	payload["user_name"] = strings.TrimSpace(util.ToString(normalized.userRow["name"]))
-	payload["user_mobile"] = strings.TrimSpace(util.ToString(normalized.userRow["mobile"]))
+	payload["user_mobile"] = strings.TrimSpace(util.ToString(normalized.userRow["account"]))
 	payload["identity_id"] = normalized.identityID
 	payload["identity_name"] = strings.TrimSpace(util.ToString(normalized.identityRow["name"]))
 	payload["level_id"] = normalized.levelID
@@ -824,7 +824,7 @@ func (payload userIdentityPayload) userIdentitySnapshot(cardNo string, expiredAt
 	return map[string]any{
 		"user_id":       payload.userID,
 		"user_name":     strings.TrimSpace(util.ToString(payload.userRow["name"])),
-		"user_mobile":   strings.TrimSpace(util.ToString(payload.userRow["mobile"])),
+		"user_mobile":   strings.TrimSpace(util.ToString(payload.userRow["account"])),
 		"identity_id":   payload.identityID,
 		"identity_name": strings.TrimSpace(util.ToString(payload.identityRow["name"])),
 		"level_id":      payload.levelID,

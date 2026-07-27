@@ -10,7 +10,7 @@ import (
 	userservice "github.com/dever-package/user/service"
 )
 
-func bindBody(c *server.Context) (map[string]any, error) {
+func BindBody(c *server.Context) (map[string]any, error) {
 	body := map[string]any{}
 	if err := c.BindJSON(&body); err != nil {
 		return nil, err
@@ -37,7 +37,11 @@ func userJSON(c *server.Context, data any, err error) error {
 	})
 }
 
-func bodyText(body map[string]any, keys ...string) string {
+func WriteJSON(c *server.Context, data any, err error) error {
+	return userJSON(c, data, err)
+}
+
+func BodyText(body map[string]any, keys ...string) string {
 	for _, key := range keys {
 		text := strings.TrimSpace(fmt.Sprint(body[key]))
 		if text != "" && text != "<nil>" {

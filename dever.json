@@ -16,6 +16,7 @@
     ],
     "sites": {
       "admin": {
+        "api": "user/admin",
         "auth": [
           {
             "key": "user-center",

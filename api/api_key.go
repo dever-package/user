@@ -17,12 +17,12 @@ func (ApiKey) GetList(c *server.Context) error {
 }
 
 func (ApiKey) PostCreate(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}
 	data, err := (userservice.APIKeyService{}).Create(c.Context(), userservice.CreateAPIKeyRequest{
-		Name:      bodyText(body, "name"),
+		Name:      BodyText(body, "name"),
 		Scopes:    bodyStringSlice(body, "scopes", "scope"),
 		ExpiresAt: parseTime(body["expires_at"], body["expiresAt"]),
 	})
@@ -30,7 +30,7 @@ func (ApiKey) PostCreate(c *server.Context) error {
 }
 
 func (ApiKey) PostDisable(c *server.Context) error {
-	body, err := bindBody(c)
+	body, err := BindBody(c)
 	if err != nil {
 		return c.Error(err)
 	}

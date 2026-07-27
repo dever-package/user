@@ -130,28 +130,31 @@ func (ProfileService) ChangePassword(ctx context.Context, req ChangePasswordRequ
 		if user == nil {
 			return NewAuthRequiredError("用户不存在或已停用")
 		}
-		if usermodel.NewUserModel().Update(tx, map[string]any{
-			"id":              userID,
-			"session_version": user.SessionVersion,
-		}, map[string]any{
-			"session_version": normalizeSessionVersion(user.SessionVersion) + 1,
-		}) == 0 {
-			return fmt.Errorf("密码修改失败，请重试")
-		}
-
-		usermodel.NewTokenModel().Update(tx, map[string]any{
-			"user_id": userID,
-			"type":    usermodel.TokenTypeRefresh,
-			"status":  usermodel.TokenStatusEnabled,
-		}, map[string]any{
-			"status":  usermodel.TokenStatusRevoked,
-			"used_at": time.Now(),
-		})
-		return nil
+		return revokeUserSessions(tx, userID, user.SessionVersion)
 	}); err != nil {
 		return nil, err
 	}
 	return map[string]any{"ok": true}, nil
+}
+
+func revokeUserSessions(ctx context.Context, userID uint64, sessionVersion uint64) error {
+	if usermodel.NewUserModel().Update(ctx, map[string]any{
+		"id":              userID,
+		"session_version": sessionVersion,
+	}, map[string]any{
+		"session_version": normalizeSessionVersion(sessionVersion) + 1,
+	}) == 0 {
+		return fmt.Errorf("用户登录状态已变化，请重试")
+	}
+	usermodel.NewTokenModel().Update(ctx, map[string]any{
+		"user_id": userID,
+		"type":    usermodel.TokenTypeRefresh,
+		"status":  usermodel.TokenStatusEnabled,
+	}, map[string]any{
+		"status":  usermodel.TokenStatusRevoked,
+		"used_at": time.Now(),
+	})
+	return nil
 }
 
 func validateProfileAvatar(ctx context.Context, userID uint64, fileID uint64) error {

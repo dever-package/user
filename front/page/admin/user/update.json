@@ -39,9 +39,26 @@
     "dialog-shell": [
       {
         "type": "form-input",
-        "placeholder": "请输入账号",
+        "name": "手机号",
+        "placeholder": "请输入手机号",
         "value": "form.account",
         "mode": "form",
+        "validate": [
+          {
+            "type": "required",
+            "message": "手机号不能为空。"
+          },
+          {
+            "type": "pattern",
+            "pattern": "^1\\d{10}$",
+            "message": "手机号格式不正确。"
+          },
+          {
+            "type": "model",
+            "except": "$form.id",
+            "message": "该手机号已存在，请更换。"
+          }
+        ],
         "meta": {
           "formLayout": "horizontal"
         }
@@ -62,15 +79,26 @@
         }
       },
       {
-        "type": "form-input",
-        "placeholder": "请输入手机号",
-        "value": "form.mobile",
+        "type": "form-password",
+        "name": "登录密码",
+        "placeholder": "新增时必填；编辑时留空不修改",
+        "value": "form.password",
         "mode": "form",
         "validate": [
           {
-            "type": "pattern",
-            "pattern": "^1\\d{10}$",
-            "message": "手机号格式不正确。"
+            "type": "required",
+            "message": "新增用户必须设置密码。",
+            "when": [
+              {
+                "path": "form.id",
+                "operator": "empty"
+              }
+            ]
+          },
+          {
+            "type": "min",
+            "min": 6,
+            "message": "密码至少 6 位。"
           }
         ],
         "meta": {
@@ -94,7 +122,7 @@
       "id": "",
       "account": "",
       "name": "",
-      "mobile": "",
+      "password": "",
       "status": 1,
       "remark": ""
     }
@@ -102,22 +130,10 @@
   "state": {},
   "action": {
     "submit": {
-      "type": "save",
-      "params": "form",
-      "data": {
-        "id": "$form.id",
-        "account": "$form.account",
-        "name": "$form.name",
-        "mobile": "$form.mobile",
-        "status": "$form.status",
-        "remark": "$form.remark"
-      },
-      "before": {
-        "service": "user.UserHook.BeforeSaveUser"
-      },
-      "after": {
-        "service": "user.UserHook.AfterSaveUser"
-      }
+      "type": "request",
+      "api": "/user/admin/user/save",
+      "method": "post",
+      "params": "form"
     }
   }
 }
