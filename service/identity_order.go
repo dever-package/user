@@ -102,7 +102,7 @@ func (AccountService) CheckoutSubscription(ctx context.Context, request Subscrip
 		status := usermodel.AccountOrderStatusPendingPayment
 		record := map[string]any{
 			"order_no": orderNo, "request_id": requestID,
-			"user_id": userID, "user_name": strings.TrimSpace(util.ToString(userRow["name"])), "user_mobile": strings.TrimSpace(util.ToString(userRow["account"])),
+			"user_id": userID, "user_name": strings.TrimSpace(util.ToString(userRow["name"])),
 			"identity_id": identityID, "identity_name": strings.TrimSpace(util.ToString(identityRow["name"])),
 			"level_id": request.LevelID, "level_name": strings.TrimSpace(util.ToString(levelRow["name"])), "level": util.ToIntDefault(levelRow["level"], 0),
 			"action":          action,

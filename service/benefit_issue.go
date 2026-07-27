@@ -375,7 +375,6 @@ func benefitGrantRecord(benefitRow map[string]any, userIdentityRow map[string]an
 		"user_identity_id":      util.ToUint64(userIdentityRow["id"]),
 		"user_id":               util.ToUint64(userIdentityRow["user_id"]),
 		"user_name":             strings.TrimSpace(util.ToString(userIdentityRow["user_name"])),
-		"user_mobile":           strings.TrimSpace(util.ToString(userIdentityRow["user_mobile"])),
 		"identity_benefit_id":   util.ToUint64(benefitRow["id"]),
 		"identity_id":           util.ToUint64(benefitRow["identity_id"]),
 		"identity_name":         strings.TrimSpace(util.ToString(benefitRow["identity_name"])),

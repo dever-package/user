@@ -64,13 +64,8 @@
           "rowKey": "id",
           "columns": [
             {
-              "value": "user_name",
-              "name": "用户名",
-              "type": "show-base"
-            },
-            {
-              "value": "user_mobile",
-              "name": "手机号",
+              "value": "user_info",
+              "name": "用户信息",
               "type": "show-base"
             },
             {
@@ -134,6 +129,7 @@
         "user_id",
         "identity_id"
       ],
+      "service": "user.PointService.AttachUserIdentityListInfo",
       "order": "id desc",
       "model": "user.NewUserIdentityLogModel"
     }

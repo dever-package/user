@@ -10,7 +10,6 @@ type UserPoint struct {
 	ID                  uint64    `dorm:"primaryKey;autoIncrement;comment:用户积分ID"`
 	UserID              uint64    `dorm:"type:bigint;not null;default:0;comment:用户"`
 	UserName            string    `dorm:"type:varchar(64);not null;default:'';comment:姓名"`
-	UserMobile          string    `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
 	PointConfigID       uint64    `dorm:"type:bigint;not null;default:1;comment:积分"`
 	PointName           string    `dorm:"type:varchar(64);not null;default:'';comment:积分名称"`
 	PointSymbol         string    `dorm:"type:varchar(32);not null;default:'';comment:积分符号"`
@@ -27,7 +26,6 @@ type UserPointIndex struct {
 	UserCreatedAt        struct{} `index:"user_id,created_at,id"`
 	PointConfigCreatedAt struct{} `index:"point_config_id,created_at,id"`
 	UserName             struct{} `index:"user_name,created_at,id"`
-	UserMobile           struct{} `index:"user_mobile,created_at,id"`
 	CreatedAt            struct{} `index:"created_at"`
 }
 

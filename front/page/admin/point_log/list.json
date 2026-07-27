@@ -101,13 +101,8 @@
           "rowKey": "id",
           "columns": [
             {
-              "value": "user_name",
-              "name": "用户名",
-              "type": "show-base"
-            },
-            {
-              "value": "user_mobile",
-              "name": "手机号",
+              "value": "user_info",
+              "name": "用户信息",
               "type": "show-base"
             },
             {
@@ -173,6 +168,7 @@
         "point_config_id",
         "change_type"
       ],
+      "service": "user.PointService.AttachUserInfo",
       "order": "id desc"
     }
   },

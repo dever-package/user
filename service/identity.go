@@ -444,7 +444,6 @@ func (UserHook) ProviderBeforeSaveUserIdentity(c *server.Context, params []any) 
 
 	payload["user_id"] = normalized.userID
 	payload["user_name"] = strings.TrimSpace(util.ToString(normalized.userRow["name"]))
-	payload["user_mobile"] = strings.TrimSpace(util.ToString(normalized.userRow["account"]))
 	payload["identity_id"] = normalized.identityID
 	payload["identity_name"] = strings.TrimSpace(util.ToString(normalized.identityRow["name"]))
 	payload["level_id"] = normalized.levelID
@@ -824,7 +823,6 @@ func (payload userIdentityPayload) userIdentitySnapshot(cardNo string, expiredAt
 	return map[string]any{
 		"user_id":       payload.userID,
 		"user_name":     strings.TrimSpace(util.ToString(payload.userRow["name"])),
-		"user_mobile":   strings.TrimSpace(util.ToString(payload.userRow["account"])),
 		"identity_id":   payload.identityID,
 		"identity_name": strings.TrimSpace(util.ToString(payload.identityRow["name"])),
 		"level_id":      payload.levelID,

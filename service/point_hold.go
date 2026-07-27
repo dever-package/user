@@ -376,7 +376,6 @@ func pointHoldRecord(request PointReserveRequest, userPointID uint64, userRow ma
 		"user_point_id":         userPointID,
 		"user_id":               request.UserID,
 		"user_name":             strings.TrimSpace(util.ToString(userRow["name"])),
-		"user_mobile":           strings.TrimSpace(util.ToString(userRow["account"])),
 		"point_config_id":       request.PointConfigID,
 		"point_name":            pointSnapshot.name,
 		"point_symbol":          pointSnapshot.symbol,

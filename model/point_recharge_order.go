@@ -12,7 +12,6 @@ type PointRechargeOrder struct {
 	RequestID           string     `dorm:"type:varchar(64);not null;comment:请求幂等键"`
 	UserID              uint64     `dorm:"type:bigint;not null;comment:用户"`
 	UserName            string     `dorm:"type:varchar(64);not null;default:'';comment:用户名称"`
-	UserMobile          string     `dorm:"type:varchar(32);not null;default:'';comment:用户手机号"`
 	PackageID           uint64     `dorm:"type:bigint;not null;comment:积分套餐"`
 	PackageName         string     `dorm:"type:varchar(64);not null;default:'';comment:套餐名称"`
 	PointConfigID       uint64     `dorm:"type:bigint;not null;comment:积分类型"`

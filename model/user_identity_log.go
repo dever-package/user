@@ -11,7 +11,6 @@ type UserIdentityLog struct {
 	UserIdentityID uint64    `dorm:"type:bigint;not null;default:0;comment:用户身份"`
 	UserID         uint64    `dorm:"type:bigint;not null;default:0;comment:用户"`
 	UserName       string    `dorm:"type:varchar(64);not null;default:'';comment:姓名"`
-	UserMobile     string    `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
 	IdentityID     uint64    `dorm:"type:bigint;not null;default:0;comment:身份"`
 	IdentityName   string    `dorm:"type:varchar(64);not null;default:'';comment:身份名称"`
 	LevelID        uint64    `dorm:"type:bigint;not null;default:0;comment:等级"`

@@ -20,7 +20,6 @@ type PointHold struct {
 	UserPointID         uint64     `dorm:"type:bigint;not null;default:0;comment:用户积分"`
 	UserID              uint64     `dorm:"type:bigint;not null;default:0;comment:用户"`
 	UserName            string     `dorm:"type:varchar(64);not null;default:'';comment:姓名"`
-	UserMobile          string     `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
 	PointConfigID       uint64     `dorm:"type:bigint;not null;default:1;comment:积分"`
 	PointName           string     `dorm:"type:varchar(64);not null;default:'';comment:积分名称"`
 	PointSymbol         string     `dorm:"type:varchar(32);not null;default:'';comment:积分符号"`

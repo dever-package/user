@@ -560,7 +560,6 @@ func adjustUserPointsOnce(ctx context.Context, request pointAdjustRequest) (poin
 			"user_point_id":         userPointID,
 			"user_id":               request.userID,
 			"user_name":             strings.TrimSpace(util.ToString(userRow["name"])),
-			"user_mobile":           strings.TrimSpace(util.ToString(userRow["account"])),
 			"point_config_id":       request.pointConfigID,
 			"point_name":            pointSnapshot.name,
 			"point_symbol":          pointSnapshot.symbol,
@@ -659,13 +658,12 @@ func syncUserPointSnapshots(ctx context.Context, userID uint64) error {
 	if err := ensureDefaultUserPointRow(ctx, userPointModel, userRow, defaultPointRow); err != nil {
 		return err
 	}
+	userName := strings.TrimSpace(util.ToString(userRow["name"]))
 	userPointModel.Update(ctx, map[string]any{"user_id": userID}, map[string]any{
-		"user_name":   strings.TrimSpace(util.ToString(userRow["name"])),
-		"user_mobile": strings.TrimSpace(util.ToString(userRow["account"])),
+		"user_name": userName,
 	}, false)
 	usermodel.NewUserIdentityModel().Update(ctx, map[string]any{"user_id": userID}, map[string]any{
-		"user_name":   strings.TrimSpace(util.ToString(userRow["name"])),
-		"user_mobile": strings.TrimSpace(util.ToString(userRow["account"])),
+		"user_name": userName,
 	}, false)
 	return nil
 }
@@ -768,7 +766,6 @@ func userPointSnapshot(userRow map[string]any, pointRow map[string]any) map[stri
 	return map[string]any{
 		"user_id":               util.ToUint64(userRow["id"]),
 		"user_name":             strings.TrimSpace(util.ToString(userRow["name"])),
-		"user_mobile":           strings.TrimSpace(util.ToString(userRow["account"])),
 		"point_config_id":       util.ToUint64(pointRow["id"]),
 		"point_name":            pointSnapshot.name,
 		"point_symbol":          pointSnapshot.symbol,
@@ -947,9 +944,6 @@ func formatUserInfo(row map[string]any, userRow map[string]any) string {
 	account := strings.TrimSpace(util.ToString(userRow["account"]))
 	if name == "" {
 		name = strings.TrimSpace(util.ToString(row["user_name"]))
-	}
-	if account == "" {
-		account = strings.TrimSpace(util.ToString(row["user_mobile"]))
 	}
 	values := []string{
 		name,

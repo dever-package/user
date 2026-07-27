@@ -10,7 +10,6 @@ type UserIdentity struct {
 	ID           uint64    `dorm:"primaryKey;autoIncrement;comment:用户身份ID"`
 	UserID       uint64    `dorm:"type:bigint;not null;default:0;comment:用户"`
 	UserName     string    `dorm:"type:varchar(64);not null;default:'';comment:姓名"`
-	UserMobile   string    `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
 	IdentityID   uint64    `dorm:"type:bigint;not null;default:0;comment:身份"`
 	IdentityName string    `dorm:"type:varchar(64);not null;default:'';comment:身份名称"`
 	LevelID      uint64    `dorm:"type:bigint;not null;default:0;comment:等级"`
@@ -30,7 +29,6 @@ type UserIdentityIndex struct {
 	CardNo            struct{} `index:"card_no"`
 	ExpiredAt         struct{} `index:"expired_at,id"`
 	UserName          struct{} `index:"user_name,created_at,id"`
-	UserMobile        struct{} `index:"user_mobile,created_at,id"`
 	Status            struct{} `index:"status,id"`
 	CreatedAt         struct{} `index:"created_at"`
 }

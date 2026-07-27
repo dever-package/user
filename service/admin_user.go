@@ -45,14 +45,6 @@ func (AdminUserService) Save(ctx context.Context, req AdminUserSaveRequest) (res
 	if len([]rune(name)) > 64 {
 		return nil, fmt.Errorf("姓名不能超过 64 个字符")
 	}
-	status := req.Status
-	if status == 0 && req.ID == 0 {
-		status = usermodel.UserStatusEnabled
-	}
-	if status != usermodel.UserStatusEnabled && status != usermodel.UserStatusDisabled {
-		return nil, fmt.Errorf("用户状态无效")
-	}
-
 	password := strings.TrimSpace(req.Password)
 	if req.ID == 0 && password == "" {
 		return nil, fmt.Errorf("新增用户必须设置密码")
@@ -77,6 +69,10 @@ func (AdminUserService) Save(ctx context.Context, req AdminUserSaveRequest) (res
 
 		userModel := usermodel.NewUserModel()
 		if created {
+			status, err := normalizeAdminUserStatus(req.Status, usermodel.UserStatusEnabled)
+			if err != nil {
+				return err
+			}
 			now := time.Now()
 			userID = uint64(userModel.Insert(tx, map[string]any{
 				"account":         account,
@@ -107,6 +103,10 @@ func (AdminUserService) Save(ctx context.Context, req AdminUserSaveRequest) (res
 		if current == nil {
 			return fmt.Errorf("用户不存在")
 		}
+		status, err := normalizeAdminUserStatus(req.Status, current.Status)
+		if err != nil {
+			return err
+		}
 		securityChanged := current.Account != account || current.Status != status || passwordHash != ""
 		userModel.Update(tx, map[string]any{"id": userID}, map[string]any{
 			"account": account,
@@ -132,6 +132,16 @@ func (AdminUserService) Save(ctx context.Context, req AdminUserSaveRequest) (res
 		"id":      userID,
 		"created": created,
 	}, nil
+}
+
+func normalizeAdminUserStatus(status int16, fallback int16) (int16, error) {
+	if status == 0 {
+		status = fallback
+	}
+	if status != usermodel.UserStatusEnabled && status != usermodel.UserStatusDisabled {
+		return 0, fmt.Errorf("用户状态无效")
+	}
+	return status, nil
 }
 
 func saveAdminPasswordCredential(ctx context.Context, userID uint64, account string, passwordHash string) error {

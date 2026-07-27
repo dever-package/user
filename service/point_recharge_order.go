@@ -72,7 +72,7 @@ func (AccountService) CheckoutPointPackage(ctx context.Context, request PointChe
 	point := pointConfigSnapshot(pointRow)
 	record := map[string]any{
 		"order_no": orderNo, "request_id": requestID,
-		"user_id": userID, "user_name": strings.TrimSpace(util.ToString(userRow["name"])), "user_mobile": strings.TrimSpace(util.ToString(userRow["account"])),
+		"user_id": userID, "user_name": strings.TrimSpace(util.ToString(userRow["name"])),
 		"package_id": request.PackageID, "package_name": strings.TrimSpace(util.ToString(packageRow["name"])),
 		"point_config_id": pointConfigID, "point_name": point.name, "point_symbol": point.symbol, "point_symbol_position": point.symbolPosition,
 		"point_amount": pointAmount, "bonus_amount": bonusAmount, "total_points": pointAmount + bonusAmount,

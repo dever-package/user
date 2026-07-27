@@ -12,7 +12,6 @@ type IdentityOrder struct {
 	RequestID           string     `dorm:"type:varchar(64);not null;comment:请求幂等键"`
 	UserID              uint64     `dorm:"type:bigint;not null;comment:用户"`
 	UserName            string     `dorm:"type:varchar(64);not null;default:'';comment:用户名称"`
-	UserMobile          string     `dorm:"type:varchar(32);not null;default:'';comment:用户手机号"`
 	IdentityID          uint64     `dorm:"type:bigint;not null;comment:身份"`
 	IdentityName        string     `dorm:"type:varchar(64);not null;default:'';comment:身份名称"`
 	LevelID             uint64     `dorm:"type:bigint;not null;comment:等级"`

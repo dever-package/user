@@ -11,7 +11,6 @@ type PointLog struct {
 	UserPointID         uint64    `dorm:"type:bigint;not null;default:0;comment:用户积分"`
 	UserID              uint64    `dorm:"type:bigint;not null;comment:用户"`
 	UserName            string    `dorm:"type:varchar(64);not null;default:'';comment:姓名"`
-	UserMobile          string    `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
 	PointConfigID       uint64    `dorm:"type:bigint;not null;default:1;comment:积分"`
 	PointName           string    `dorm:"type:varchar(64);not null;default:'';comment:积分名称"`
 	PointSymbol         string    `dorm:"type:varchar(32);not null;default:'';comment:积分符号"`
@@ -32,7 +31,6 @@ type PointLogIndex struct {
 	UserCreatedAt        struct{} `index:"user_id,created_at,id"`
 	PointConfigCreatedAt struct{} `index:"point_config_id,created_at,id"`
 	UserName             struct{} `index:"user_name,created_at,id"`
-	UserMobile           struct{} `index:"user_mobile,created_at,id"`
 	ChangeType           struct{} `index:"change_type,created_at,id"`
 	Source               struct{} `index:"source,created_at,id"`
 	PointHoldCreatedAt   struct{} `index:"point_hold_id,created_at,id"`
@@ -51,7 +49,7 @@ var pointLogUserPointRelation = orm.Relation{
 	Field:      "user_point_id",
 	Name:       "user_point",
 	Option:     "user.NewUserPointModel",
-	OptionKeys: []string{"user_name", "user_mobile", "point_name", "balance"},
+	OptionKeys: []string{"user_name", "point_name", "balance"},
 }
 
 var pointLogConfigRelation = orm.Relation{

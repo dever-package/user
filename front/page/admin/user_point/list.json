@@ -73,7 +73,7 @@
     "toolbar-row": [
       {
         "type": "form-input",
-        "placeholder": "筛选姓名或手机号...",
+        "placeholder": "筛选姓名...",
         "value": "search.keyword",
         "mode": "search"
       },
@@ -216,7 +216,6 @@
             "form.point_config_id": "data.actionTarget.adjustPoint.point_config_id",
             "form.balance": "data.actionTarget.adjustPoint.balance",
             "form.user_name": "data.actionTarget.adjustPoint.user_name",
-            "form.user_mobile": "data.actionTarget.adjustPoint.user_mobile",
             "form.point_name": "data.actionTarget.adjustPoint.point_name"
           },
           "size": "md",
@@ -237,8 +236,7 @@
     },
     "table": {
       "searchFields": [
-        "user_name",
-        "user_mobile"
+        "user_name"
       ],
       "filterFields": [
         "user_id",

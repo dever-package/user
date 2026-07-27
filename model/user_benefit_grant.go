@@ -11,7 +11,6 @@ type UserBenefitGrant struct {
 	UserIdentityID      uint64     `dorm:"type:bigint;not null;default:0;comment:用户身份"`
 	UserID              uint64     `dorm:"type:bigint;not null;default:0;comment:用户"`
 	UserName            string     `dorm:"type:varchar(64);not null;default:'';comment:姓名"`
-	UserMobile          string     `dorm:"type:varchar(32);not null;default:'';comment:手机号"`
 	IdentityBenefitID   uint64     `dorm:"type:bigint;not null;default:0;comment:身份权益"`
 	IdentityID          uint64     `dorm:"type:bigint;not null;default:0;comment:身份"`
 	IdentityName        string     `dorm:"type:varchar(64);not null;default:'';comment:身份名称"`
@@ -53,7 +52,7 @@ var userBenefitGrantUserIdentityRelation = orm.Relation{
 	Field:      "user_identity_id",
 	Name:       "user_identity",
 	Option:     "user.NewUserIdentityModel",
-	OptionKeys: []string{"user_name", "user_mobile", "identity_name", "level_name", "expired_at", "status"},
+	OptionKeys: []string{"user_name", "identity_name", "level_name", "expired_at", "status"},
 }
 
 var userBenefitGrantIdentityBenefitRelation = orm.Relation{
