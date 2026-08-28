@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"strings"
 
 	"github.com/shemic/dever/server"
@@ -16,11 +17,14 @@ const (
 	maxPointExchangeRate = 1_000_000
 )
 
-func (UserHook) ProviderBeforeSavePointConfig(_ *server.Context, params []any) any {
+func (UserHook) ProviderBeforeSavePointConfig(c *server.Context, params []any) any {
 	payload := clonePointPayload(params)
 	if isUserPartialRecord(payload) {
 		if _, ok := payload["sort"]; ok {
 			payload["sort"] = normalizeUserSort(payload["sort"])
+		}
+		if _, ok := payload["exchange_rate"]; ok {
+			payload["exchange_rate"] = normalizePointExchangeRate(c.Context(), payload)
 		}
 		return payload
 	}
@@ -32,6 +36,13 @@ func (UserHook) ProviderBeforeSavePointConfig(_ *server.Context, params []any) a
 	payload["name"] = name
 
 	payload["intro"] = strings.TrimSpace(util.ToString(payload["intro"]))
+	payload["exchange_rate"] = normalizePointExchangeRate(c.Context(), payload)
+	payload["symbol"] = strings.TrimSpace(util.ToString(payload["symbol"]))
+	payload["symbol_position"] = normalizePointSymbolPosition(payload["symbol_position"])
+	return payload
+}
+
+func normalizePointExchangeRate(ctx context.Context, payload map[string]any) int {
 	exchangeRate := util.ToIntDefault(payload["exchange_rate"], 100)
 	if exchangeRate < 0 {
 		panic(frontaction.NewFieldError("form.exchange_rate", "货币换算不能小于 0。"))
@@ -39,10 +50,11 @@ func (UserHook) ProviderBeforeSavePointConfig(_ *server.Context, params []any) a
 	if exchangeRate > maxPointExchangeRate {
 		panic(frontaction.NewFieldError("form.exchange_rate", "货币换算不能超过 1000000。"))
 	}
-	payload["exchange_rate"] = exchangeRate
-	payload["symbol"] = strings.TrimSpace(util.ToString(payload["symbol"]))
-	payload["symbol_position"] = normalizePointSymbolPosition(payload["symbol_position"])
-	return payload
+	pointConfigID := util.ToUint64(payload["id"])
+	if exchangeRate == 0 && pointConfigID > 0 && usermodel.NewIdentityBillingBenefitModel().Count(ctx, map[string]any{"point_config_id": pointConfigID}) > 0 {
+		panic(frontaction.NewFieldError("form.exchange_rate", "当前积分已用于计费权益，货币换算必须大于 0。"))
+	}
+	return exchangeRate
 }
 
 func (UserHook) ProviderAfterSavePointConfig(c *server.Context, params []any) any {
