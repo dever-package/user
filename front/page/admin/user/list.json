@@ -147,6 +147,20 @@
               "meta": {
                 "trueValue": 1,
                 "falseValue": 2
+              },
+              "action": {
+                "change": {
+                  "type": "request",
+                  "api": "/user/admin/user/save",
+                  "method": "post",
+                  "params": {
+                    "id": "$row.id",
+                    "account": "$row.account",
+                    "name": "$row.name",
+                    "status": "$value",
+                    "remark": "$row.remark"
+                  }
+                }
               }
             },
             {
